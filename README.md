@@ -97,29 +97,51 @@ running `docker compose up`. **Change `SECRET_KEY` before deploying anywhere.**
 
 ## Quick start without Docker
 
-Prerequisites: Python 3.11+, Node 20+, a running PostgreSQL with a database
-matching `DATABASE_URL` in `.env`.
+**Prerequisites:** Python 3.11+, [`uv`](https://docs.astral.sh/uv/), Node 20+, PostgreSQL 16.
 
-### Backend
+### 1. Database
+
+**Option A — only the database in Docker (recommended for local dev):**
+
+```bash
+docker compose up db
+```
+
+This starts PostgreSQL mapped to port **5466** on your machine, which matches
+the default `DATABASE_URL` in `.env.example`. No further database setup needed.
+
+**Option B — PostgreSQL installed locally:**
+
+Create the user and database (adjust port in `.env` to match your installation):
+
+```sql
+CREATE USER expense_user WITH PASSWORD 'expense_pass';
+CREATE DATABASE expense_tracker OWNER expense_user;
+```
+
+Then edit `backend/.env` and set `DATABASE_URL` to use the correct host and port
+(typically `5432` for a default PostgreSQL installation).
+
+### 2. Backend
 
 ```bash
 cd backend
-cp .env.example .env             # then edit values
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e ".[dev]"
+cp .env.example .env             # edit values if needed
+uv venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+uv pip install -e ".[dev]"
 alembic upgrade head
 python -m app.db.seed
 uvicorn app.main:app --reload
 ```
 
-Or just run the helper:
+Or just run the helper (uses `uv` internally):
 
 ```bash
 ./scripts/setup_backend.sh
 ```
 
-### Frontend
+### 3. Frontend
 
 ```bash
 cd frontend

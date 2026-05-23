@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: expense_pass
       POSTGRES_DB: expense_tracker
     ports:
-      - "5432:5432"
+      - "5466:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:

@@ -32,7 +32,7 @@ class Settings(BaseSettings):
 
     # Database
     database_url: str = Field(
-        default="postgresql+psycopg://expense_user:expense_pass@localhost:5432/expense_tracker"
+        default="postgresql+psycopg://expense_user:expense_pass@localhost:5466/expense_tracker"
     )
 
     # Security
