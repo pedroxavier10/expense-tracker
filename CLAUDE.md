@@ -18,9 +18,10 @@ docker compose up --build
 ### Backend (no Docker)
 ```bash
 cd backend
-python -m venv .venv
+cp .env.example .env             # then edit values
+uv venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
-pip install -e ".[dev]"
+uv pip install -e ".[dev]"
 alembic upgrade head
 python -m app.db.seed
 uvicorn app.main:app --reload
