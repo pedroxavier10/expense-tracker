@@ -13,7 +13,9 @@ import type {
 interface Props {
   categories: Category[];
   initial?: Expense;
-  onSubmit: (data: ExpenseCreatePayload | ExpenseUpdatePayload) => Promise<void>;
+  onSubmit: (
+    data: ExpenseCreatePayload | ExpenseUpdatePayload,
+  ) => Promise<void>;
   onCancel?: () => void;
   submitLabel?: string;
 }
@@ -29,7 +31,7 @@ export function ExpenseForm({
   const [date, setDate] = useState(initial?.expense_date ?? todayIso());
   const [description, setDescription] = useState(initial?.description ?? "");
   const [categoryId, setCategoryId] = useState(
-    initial?.category.id ?? categories[0]?.id ?? ""
+    initial?.category.id ?? categories[0]?.id ?? "",
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
