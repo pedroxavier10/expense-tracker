@@ -60,3 +60,24 @@ export interface Token {
   access_token: string;
   token_type: string;
 }
+
+// ---------- Chat ----------
+
+export type ChatRole = "user" | "assistant";
+
+export interface ChatMessage {
+  role: ChatRole;
+  content: string;
+}
+
+export type ChatStreamEvent =
+  | { type: "text"; delta: string }
+  | { type: "tool_use"; name: string; args: unknown }
+  | { type: "tool_result"; name: string; ok: boolean }
+  | {
+      type: "client_action";
+      action: string;
+      payload: Record<string, unknown>;
+    }
+  | { type: "done" }
+  | { type: "error"; message: string };

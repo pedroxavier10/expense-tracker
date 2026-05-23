@@ -10,6 +10,8 @@
 
 import type {
   Category,
+  ChatMessage,
+  ChatStreamEvent,
   Expense,
   ExpenseCreatePayload,
   ExpenseFilters,
@@ -154,6 +156,65 @@ export async function updateExpense(
 
 export async function deleteExpense(id: string): Promise<void> {
   return request<void>(`/expenses/${id}`, { method: "DELETE" });
+}
+
+// ---------- Chat (SSE streaming) ----------
+
+/**
+ * POST /chat/stream and dispatch SSE events to `onEvent`.
+ *
+ * We can't use `EventSource` here: it only supports GET and cannot send the
+ * Authorization header. So we use fetch + a manual reader over the response
+ * body, splitting on the SSE `\n\n` boundary.
+ */
+export async function streamChat(
+  messages: ChatMessage[],
+  onEvent: (event: ChatStreamEvent) => void,
+  signal?: AbortSignal,
+): Promise<void> {
+  const token = getToken();
+  const res = await fetch(`${API_URL}/chat/stream`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ messages }),
+    signal,
+  });
+
+  if (!res.ok || !res.body) {
+    let detail = res.statusText;
+    try {
+      const body = await res.json();
+      if (body && typeof body.detail === "string") detail = body.detail;
+    } catch {
+      // ignore
+    }
+    throw new ApiError(res.status, detail);
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const parts = buffer.split("\n\n");
+    buffer = parts.pop() ?? "";
+    for (const part of parts) {
+      const dataLine = part
+        .split("\n")
+        .find((line) => line.startsWith("data: "));
+      if (!dataLine) continue;
+      try {
+        onEvent(JSON.parse(dataLine.slice(6)) as ChatStreamEvent);
+      } catch {
+        // ignore malformed lines
+      }
+    }
+  }
 }
 
 export { ApiError };

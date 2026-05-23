@@ -1,16 +1,32 @@
 """Tool registry. Add new tools here.
 
 Importing this module populates `REGISTRY` with every tool the LLM layer
-exposes. Provider adapters (future work) iterate over `REGISTRY` to build
-their tool schemas.
+exposes. Provider adapters iterate over `REGISTRY` to build their tool schemas.
 """
 
 from app.llm.registry import Tool
 from app.llm.tools.add_expense import AddExpenseInput, add_expense
+from app.llm.tools.list_categories import ListCategoriesInput, list_categories
+from app.llm.tools.monthly_summary import MonthlySummaryInput, monthly_summary
+from app.llm.tools.open_add_expense_form import (
+    OpenAddExpenseFormInput,
+    open_add_expense_form,
+)
 from app.llm.tools.search_expenses import search_expenses
+from app.llm.tools.top_categories import TopCategoriesInput, top_categories
 from app.schemas.expense import ExpenseFilters
 
 REGISTRY: dict[str, Tool] = {
+    "list_categories": Tool(
+        name="list_categories",
+        description=(
+            "List every available expense category with its id, slug and display "
+            "name. Call this first when you need a category id (e.g. before "
+            "add_expense or to filter search_expenses by category)."
+        ),
+        input_model=ListCategoriesInput,
+        handler=list_categories,
+    ),
     "search_expenses": Tool(
         name="search_expenses",
         description=(
@@ -21,14 +37,47 @@ REGISTRY: dict[str, Tool] = {
         input_model=ExpenseFilters,
         handler=search_expenses,
     ),
+    "monthly_summary": Tool(
+        name="monthly_summary",
+        description=(
+            "Return the total spend and per-category breakdown for a given month "
+            "(YYYY-MM). Use this for questions like 'how much did I spend in April?' "
+            "or 'where did my money go last month?'."
+        ),
+        input_model=MonthlySummaryInput,
+        handler=monthly_summary,
+    ),
+    "top_categories": Tool(
+        name="top_categories",
+        description=(
+            "Return the top N categories by total spend in a date window (both "
+            "bounds optional). Use this for questions like 'where am I spending "
+            "the most this year?'."
+        ),
+        input_model=TopCategoriesInput,
+        handler=top_categories,
+    ),
     "add_expense": Tool(
         name="add_expense",
         description=(
-            "Record a new expense for the authenticated user. The caller must "
-            "have already resolved any relative dates and the category id."
+            "Record a new expense for the authenticated user. Only call this when "
+            "you have a concrete amount, expense_date, description and category_id. "
+            "If any required field is missing or uncertain, prefer "
+            "open_add_expense_form so the user can confirm in the UI."
         ),
         input_model=AddExpenseInput,
         handler=add_expense,
+    ),
+    "open_add_expense_form": Tool(
+        name="open_add_expense_form",
+        description=(
+            "Ask the frontend to open the 'add expense' modal pre-filled with "
+            "whatever values you managed to extract. Use this when the user "
+            "wants to add an expense but you are missing fields, or when they "
+            "ask you to 'open the form'. Does NOT write to the database."
+        ),
+        input_model=OpenAddExpenseFormInput,
+        handler=open_add_expense_form,
     ),
 }
 

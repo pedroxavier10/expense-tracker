@@ -10,9 +10,17 @@ import type {
   ExpenseUpdatePayload,
 } from "@/types/api";
 
+export interface ExpenseFormInitialValues {
+  amount?: string;
+  expense_date?: string;
+  description?: string;
+  category_id?: string;
+}
+
 interface Props {
   categories: Category[];
   initial?: Expense;
+  initialValues?: ExpenseFormInitialValues;
   onSubmit: (
     data: ExpenseCreatePayload | ExpenseUpdatePayload,
   ) => Promise<void>;
@@ -23,15 +31,22 @@ interface Props {
 export function ExpenseForm({
   categories,
   initial,
+  initialValues,
   onSubmit,
   onCancel,
   submitLabel = "Save",
 }: Props) {
-  const [amount, setAmount] = useState(initial?.amount ?? "");
-  const [date, setDate] = useState(initial?.expense_date ?? todayIso());
-  const [description, setDescription] = useState(initial?.description ?? "");
+  const [amount, setAmount] = useState(
+    initial?.amount ?? initialValues?.amount ?? "",
+  );
+  const [date, setDate] = useState(
+    initial?.expense_date ?? initialValues?.expense_date ?? todayIso(),
+  );
+  const [description, setDescription] = useState(
+    initial?.description ?? initialValues?.description ?? "",
+  );
   const [categoryId, setCategoryId] = useState(
-    initial?.category.id ?? categories[0]?.id ?? "",
+    initial?.category.id ?? initialValues?.category_id ?? categories[0]?.id ?? "",
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
