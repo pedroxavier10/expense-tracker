@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: theme("colors.paper.DEFAULT");
+    color: theme("colors.ink.DEFAULT");
+    font-family: theme("fontFamily.sans");
+    font-feature-settings: "kern", "liga", "calt";
+  }
+
+  /* Subtle grain background — pure CSS, no asset needed. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      rgba(0, 0, 0, 0.02) 1px,
+      transparent 0
+    );
+    background-size: 4px 4px;
+  }
+
+  ::selection {
+    background-color: theme("colors.accent.soft");
+    color: theme("colors.ink.DEFAULT");
+  }
+}
+
+@layer components {
+  .text-amount {
+    @apply font-mono tabular-nums;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .field {
+    @apply w-full px-3 py-2 bg-paper-card border border-paper-line rounded text-ink placeholder:text-ink-muted/60 focus:outline-none focus:border-ink transition-colors;
+  }
+
+  .label {
+    @apply block text-xs uppercase tracking-[0.12em] text-ink-muted mb-1.5 font-medium;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 bg-ink text-paper font-medium rounded hover:bg-ink-soft transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-3 py-1.5 text-ink-muted hover:text-ink hover:bg-paper-line/40 rounded transition-colors text-sm;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 px-3 py-1.5 text-accent hover:bg-accent-soft/40 rounded transition-colors text-sm font-medium;
+  }
+}
