@@ -1,0 +1,134 @@
+name: Migration Check
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check-migration:
+    name: Check DB migration
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect model changes vs migrations
+        id: check
+        run: |
+          CHANGED=$(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}")
+
+          # Model files that are not __init__.py
+          MODEL_CHANGES=$(echo "$CHANGED" | grep -E '^backend/app/models/[^_].*\.py$' | grep -v '__init__' || true)
+
+          # New or modified Alembic migration files
+          NEW_MIGRATIONS=$(echo "$CHANGED" | grep -E '^backend/alembic/versions/[0-9a-f].*\.py$' || true)
+
+          # Persist for later steps
+          {
+            echo "model_changes<<EOF"
+            echo "$MODEL_CHANGES"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          if [ -n "$MODEL_CHANGES" ] && [ -z "$NEW_MIGRATIONS" ]; then
+            echo "needs_migration=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "needs_migration=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ── PR comment when migration is missing ────────────────────────────
+      - name: Post or update PR comment (migration missing)
+        if: steps.check.outputs.needs_migration == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const modelChanges = `${{ steps.check.outputs.model_changes }}`;
+            const fileList = modelChanges.split('\n').filter(Boolean).map(f => `- \`${f}\``).join('\n');
+
+            const body = [
+              '## ⚠️ Migração de base de dados em falta',
+              '',
+              'Este PR modifica modelos SQLModel mas **não inclui uma migração Alembic** correspondente.',
+              '',
+              '**Ficheiros de modelo alterados:**',
+              fileList,
+              '',
+              '**Como resolver:**',
+              '1. Localmente, usa o agente `migration-author` no Claude Code:',
+              '   ```',
+              '   # No terminal com Claude Code aberto:',
+              '   Agent(migration-author): gera migração para as alterações nos modelos',
+              '   ```',
+              '2. Revê o ficheiro gerado em `backend/alembic/versions/`',
+              '3. Faz commit da migração e push para este PR',
+              '',
+              '_O check passa automaticamente quando a migração for adicionada aos commits._',
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const MARKER = 'Migração de base de dados em falta';
+            const existing = comments.find(c => c.user.type === 'Bot' && c.body.includes(MARKER));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+      # ── Resolve comment when migration is present ────────────────────────
+      - name: Resolve PR comment (migration present)
+        if: steps.check.outputs.needs_migration == 'false'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const MARKER = 'Migração de base de dados em falta';
+            const existing = comments.find(c => c.user.type === 'Bot' && c.body.includes(MARKER));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: '## ✅ Migração incluída\n\nA migração de base de dados foi adicionada ao PR. Check passou.',
+              });
+            }
+
+      # ── Final gate ───────────────────────────────────────────────────────
+      - name: Fail if migration is missing
+        if: steps.check.outputs.needs_migration == 'true'
+        run: |
+          echo "❌ Modelos SQLModel alterados sem migração Alembic correspondente."
+          echo "Ficheiros: ${{ steps.check.outputs.model_changes }}"
+          exit 1
+
+      - name: Pass
+        if: steps.check.outputs.needs_migration == 'false'
+        run: echo "✅ Nenhuma migração necessária, ou migração já incluída no PR."
