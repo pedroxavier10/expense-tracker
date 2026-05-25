@@ -55,7 +55,7 @@ class Settings(BaseSettings):
     llm_api_key: str = "ollama"  # ignored by Ollama; required by the OpenAI client
     llm_model: str = "llama3.2"
     llm_temperature: float = 0.2
-    llm_max_tool_iterations: int = 5  # safety limit on the tool-calling loop
+    llm_max_tool_iterations: int = 6  # safety limit on the tool-calling loop
 
     @property
     def cors_origins_list(self) -> list[str]:

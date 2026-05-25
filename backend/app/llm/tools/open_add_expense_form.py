@@ -9,7 +9,6 @@ required fields, or when the user explicitly asks to "open the form".
 """
 
 from datetime import date
-from decimal import Decimal
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -21,9 +20,7 @@ from app.services import category_service
 class OpenAddExpenseFormInput(BaseModel):
     """All fields optional — the model fills in whatever it inferred."""
 
-    amount: Decimal | None = Field(
-        default=None, gt=0, max_digits=12, decimal_places=2, description="Expense amount."
-    )
+    amount: float | None = Field(default=None, gt=0, description="Expense amount.")
     expense_date: date | None = Field(default=None, description="Date of the expense.")
     description: str | None = Field(default=None, max_length=500)
     category_slug: str | None = Field(

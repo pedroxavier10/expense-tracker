@@ -48,11 +48,15 @@ whenever they would give a more accurate answer than guessing. Prefer calling
 `list_categories` before `add_expense` if you don't already know the category id.
 
 Rules:
-- To register an expense with all required fields known (amount, date,
-  description, category_id), call `add_expense`.
-- If any required field is missing or ambiguous, call `open_add_expense_form`
-  with the values you do have — the UI will open a form prefilled for the
-  user to confirm. Do NOT invent missing values.
+- When the user wants to register an expense, always call `list_categories`
+  first if you don't already know the category_id. Then pick the best-matching
+  category based on the expense description (e.g. "lanche", "supermercado" →
+  food; "gasolina", "uber" → transport). Only ask the user to choose if the
+  description gives no hint at all.
+- Once you have amount, expense_date, description and category_id, call
+  `add_expense` directly — do NOT open the form.
+- Only call `open_add_expense_form` when a field other than category_id is
+  missing or ambiguous (e.g. the amount is unclear). Pass whatever you inferred.
 - You CANNOT delete expenses. If the user asks to delete one, do NOT call
   any tool for that purpose — instead, tell them they can do it in the
   "Despesas" page (suggest they filter by the description or date you found).
@@ -78,7 +82,7 @@ async def _run_tool(
     if tool is None:
         return {"error": f"Unknown tool: {name}"}, None
     try:
-        args = json.loads(raw_args or "{}")
+        args = json.loads(raw_args or "{}") or {}
     except json.JSONDecodeError as exc:
         return {"error": f"Invalid JSON arguments: {exc}"}, None
     try:
@@ -100,9 +104,7 @@ async def _run_tool(
     return result, client_action
 
 
-async def _stream_chat(
-    session: Session, user_id: UUID, request: ChatRequest
-) -> AsyncIterator[str]:
+async def _stream_chat(session: Session, user_id: UUID, request: ChatRequest) -> AsyncIterator[str]:
     settings = get_settings()
     client = get_llm_client()
 
@@ -112,8 +114,19 @@ async def _stream_chat(
     ]
     tools_schema = [t.to_openai_schema() for t in REGISTRY.values()]
 
+    logger.info(
+        "Chat started — model: %s | history: %d messages | tools available: %s",
+        settings.llm_model,
+        len(request.messages),
+        [t["function"]["name"] for t in tools_schema],
+    )
+
     try:
-        for _ in range(settings.llm_max_tool_iterations):
+        for iteration in range(settings.llm_max_tool_iterations):
+            logger.debug(
+                "Iteration %d/%d — calling LLM", iteration + 1, settings.llm_max_tool_iterations
+            )
+
             stream = await client.chat.completions.create(
                 model=settings.llm_model,
                 messages=messages,
@@ -139,9 +152,7 @@ async def _stream_chat(
                 if delta.tool_calls:
                     for tc in delta.tool_calls:
                         idx = tc.index
-                        slot = tool_calls.setdefault(
-                            idx, {"id": None, "name": "", "arguments": ""}
-                        )
+                        slot = tool_calls.setdefault(idx, {"id": None, "name": "", "arguments": ""})
                         if tc.id:
                             slot["id"] = tc.id
                         if tc.function:
@@ -154,8 +165,18 @@ async def _stream_chat(
                     finish_reason = choice.finish_reason
 
             if not tool_calls:
+                logger.info(
+                    "Chat done — finished after %d iteration(s), no tool calls", iteration + 1
+                )
                 yield _sse({"type": "done"})
                 return
+
+            logger.info(
+                "Iteration %d — model requested %d tool(s): %s",
+                iteration + 1,
+                len(tool_calls),
+                [tc["name"] for tc in tool_calls.values()],
+            )
 
             assistant_msg: dict[str, Any] = {
                 "role": "assistant",
@@ -171,21 +192,24 @@ async def _stream_chat(
             }
             messages.append(assistant_msg)
 
+            dispatched_client_action = False
             for idx, tc in sorted(tool_calls.items()):
                 name = tc["name"]
                 try:
                     args_preview = json.loads(tc["arguments"] or "{}")
                 except json.JSONDecodeError:
                     args_preview = tc["arguments"]
+
+                logger.debug("Calling tool %r with args: %s", name, args_preview)
                 yield _sse({"type": "tool_use", "name": name, "args": args_preview})
 
-                result, client_action = await _run_tool(
-                    session, user_id, name, tc["arguments"]
-                )
+                result, client_action = await _run_tool(session, user_id, name, tc["arguments"])
                 ok = isinstance(result, dict) and "error" not in result
+                logger.info("Tool %r → %s | result: %s", name, "OK" if ok else "ERROR", result)
                 yield _sse({"type": "tool_result", "name": name, "ok": ok})
                 if client_action is not None:
                     yield _sse({"type": "client_action", **client_action})
+                    dispatched_client_action = True
 
                 messages.append(
                     {
@@ -195,10 +219,22 @@ async def _stream_chat(
                     }
                 )
 
-            if finish_reason == "stop":
+            if dispatched_client_action:
+                logger.info(
+                    "Chat done — client_action dispatched, handing control back to the user"
+                )
                 yield _sse({"type": "done"})
                 return
 
+            if finish_reason == "stop":
+                logger.info("Chat done — model signalled stop after %d iteration(s)", iteration + 1)
+                yield _sse({"type": "done"})
+                return
+
+        logger.warning(
+            "Chat aborted — reached max tool iterations (%d) without a final answer",
+            settings.llm_max_tool_iterations,
+        )
         yield _sse(
             {
                 "type": "error",
