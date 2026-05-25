@@ -6,7 +6,6 @@ exposes. Provider adapters iterate over `REGISTRY` to build their tool schemas.
 
 from app.llm.registry import Tool
 from app.llm.tools.add_expense import AddExpenseInput, add_expense
-from app.llm.tools.list_categories import ListCategoriesInput, list_categories
 from app.llm.tools.monthly_summary import MonthlySummaryInput, monthly_summary
 from app.llm.tools.open_add_expense_form import (
     OpenAddExpenseFormInput,
@@ -17,16 +16,6 @@ from app.llm.tools.top_categories import TopCategoriesInput, top_categories
 from app.schemas.expense import ExpenseFilters
 
 REGISTRY: dict[str, Tool] = {
-    "list_categories": Tool(
-        name="list_categories",
-        description=(
-            "List every available expense category with its id, slug and display "
-            "name. Call this first when you need a category id (e.g. before "
-            "add_expense or to filter search_expenses by category)."
-        ),
-        input_model=ListCategoriesInput,
-        handler=list_categories,
-    ),
     "search_expenses": Tool(
         name="search_expenses",
         description=(

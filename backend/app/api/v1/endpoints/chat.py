@@ -32,7 +32,9 @@ from app.api.deps import CurrentUser, SessionDep
 from app.core.config import get_settings
 from app.llm.client import get_llm_client
 from app.llm.tools import REGISTRY
+from app.models.category import Category
 from app.schemas.chat import ChatRequest
+from app.services.category_service import list_categories as fetch_categories
 
 logger = logging.getLogger(__name__)
 
@@ -43,16 +45,17 @@ SYSTEM_PROMPT_TEMPLATE = """You are the assistant of a personal expense tracker.
 Today is {today} (UTC). The user's locale is pt-PT — answer in European Portuguese.
 Format money as e.g. "12,50 €". Be concise.
 
+Available expense categories (use these exact ids):
+{categories}
+
 You have access to tools that read and modify the user's expenses. Use them
-whenever they would give a more accurate answer than guessing. Prefer calling
-`list_categories` before `add_expense` if you don't already know the category id.
+whenever they would give a more accurate answer than guessing.
 
 Rules:
-- When the user wants to register an expense, always call `list_categories`
-  first if you don't already know the category_id. Then pick the best-matching
-  category based on the expense description (e.g. "lanche", "supermercado" →
-  food; "gasolina", "uber" → transport). Only ask the user to choose if the
-  description gives no hint at all.
+- When the user wants to register an expense, pick the best-matching category
+  from the list above based on the expense description (e.g. "lanche",
+  "supermercado" → food; "gasolina", "uber" → transport). Only ask the user
+  to choose if the description gives no hint at all.
 - Once you have amount, expense_date, description and category_id, call
   `add_expense` directly — do NOT open the form.
 - Only call `open_add_expense_form` when a field other than category_id is
@@ -66,8 +69,15 @@ Rules:
 """
 
 
-def _build_system_prompt() -> str:
-    return SYSTEM_PROMPT_TEMPLATE.format(today=datetime.now(UTC).date().isoformat())
+def _build_system_prompt(categories: list[Category]) -> str:
+    categories_text = "\n".join(
+        f"  - {c.slug} (id: {c.id}): {c.name} {c.icon or ''}"
+        for c in categories
+    )
+    return SYSTEM_PROMPT_TEMPLATE.format(
+        today=datetime.now(UTC).date().isoformat(),
+        categories=categories_text,
+    )
 
 
 def _sse(event: dict[str, Any]) -> str:
@@ -108,8 +118,9 @@ async def _stream_chat(session: Session, user_id: UUID, request: ChatRequest) ->
     settings = get_settings()
     client = get_llm_client()
 
+    categories = fetch_categories(session)
     messages: list[dict[str, Any]] = [
-        {"role": "system", "content": _build_system_prompt()},
+        {"role": "system", "content": _build_system_prompt(categories)},
         *[{"role": m.role.value, "content": m.content} for m in request.messages],
     ]
     tools_schema = [t.to_openai_schema() for t in REGISTRY.values()]
