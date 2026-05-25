@@ -1,16 +1,17 @@
 "use client";
 
 import { useEffect } from "react";
-import { ExpenseForm } from "@/components/ExpenseForm";
+import { ExpenseForm, type ExpenseFormInitialValues } from "@/components/ExpenseForm";
 import type { Category, ExpenseCreatePayload, ExpenseUpdatePayload } from "@/types/api";
 
 interface Props {
   categories: Category[];
   onSubmit: (data: ExpenseCreatePayload | ExpenseUpdatePayload) => Promise<void>;
   onClose: () => void;
+  initialValues?: ExpenseFormInitialValues;
 }
 
-export function AddExpenseModal({ categories, onSubmit, onClose }: Props) {
+export function AddExpenseModal({ categories, onSubmit, onClose, initialValues }: Props) {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -43,6 +44,7 @@ export function AddExpenseModal({ categories, onSubmit, onClose }: Props) {
         </div>
         <ExpenseForm
           categories={categories}
+          initialValues={initialValues}
           onSubmit={async (data) => {
             await onSubmit(data);
             onClose();

@@ -48,6 +48,15 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+  {
+    href: "/chat",
+    label: "Chat",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2 4.5A1.5 1.5 0 0 1 3.5 3h11A1.5 1.5 0 0 1 16 4.5v7A1.5 1.5 0 0 1 14.5 13H7l-3 2.5V13H3.5A1.5 1.5 0 0 1 2 11.5v-7z" />
+      </svg>
+    ),
+  },
 ];
 
 export function Sidebar() {

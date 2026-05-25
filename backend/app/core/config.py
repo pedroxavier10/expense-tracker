@@ -47,9 +47,15 @@ class Settings(BaseSettings):
     default_user_email: str = "me@example.com"
     default_user_password: str = "changeme"
 
-    # LLM providers (optional, used by future llm module)
-    openai_api_key: str | None = None
-    anthropic_api_key: str | None = None
+    # LLM
+    # Defaults target a local Ollama daemon (OpenAI-compatible API).
+    # To switch to OpenAI: set llm_base_url=https://api.openai.com/v1, set llm_api_key
+    # to a real key, and llm_model to e.g. "gpt-4o-mini".
+    llm_base_url: str = "http://localhost:11434/v1"
+    llm_api_key: str = "ollama"  # ignored by Ollama; required by the OpenAI client
+    llm_model: str = "llama3.2"
+    llm_temperature: float = 0.2
+    llm_max_tool_iterations: int = 6  # safety limit on the tool-calling loop
 
     @property
     def cors_origins_list(self) -> list[str]:

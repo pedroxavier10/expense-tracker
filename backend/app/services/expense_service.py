@@ -7,6 +7,7 @@ with an `ExpenseFilters` instance.
 
 from calendar import monthrange
 from datetime import UTC, date, datetime
+from decimal import Decimal
 from uuid import UUID
 
 from sqlalchemy import func
@@ -117,3 +118,90 @@ def delete_expense(session: Session, user_id: UUID, expense_id: UUID) -> bool:
     session.delete(expense)
     session.commit()
     return True
+
+
+def get_monthly_summary(session: Session, user_id: UUID, month: str) -> dict:
+    """Return total + per-category breakdown for a YYYY-MM month."""
+    start, end = _resolve_month(month)
+    rows = session.exec(
+        select(
+            Category.id,
+            Category.slug,
+            Category.name,
+            func.coalesce(func.sum(Expense.amount), 0).label("total"),
+            func.count(Expense.id).label("count"),
+        )
+        .join(Category, Category.id == Expense.category_id)
+        .where(
+            Expense.user_id == user_id,
+            Expense.expense_date >= start,
+            Expense.expense_date <= end,
+        )
+        .group_by(Category.id, Category.slug, Category.name)
+        .order_by(func.sum(Expense.amount).desc())
+    ).all()
+
+    by_category = [
+        {
+            "category_id": str(cid),
+            "slug": slug,
+            "name": name,
+            "total": str(total),
+            "count": int(count),
+        }
+        for cid, slug, name, total, count in rows
+    ]
+    grand_total = sum((Decimal(c["total"]) for c in by_category), Decimal("0"))
+    grand_count = sum(c["count"] for c in by_category)
+    return {
+        "month": month,
+        "total": str(grand_total),
+        "count": grand_count,
+        "by_category": by_category,
+    }
+
+
+def get_top_categories(
+    session: Session,
+    user_id: UUID,
+    date_from: date | None,
+    date_to: date | None,
+    limit: int,
+) -> dict:
+    """Return the categories with the highest total spend in the given window."""
+    stmt = (
+        select(
+            Category.id,
+            Category.slug,
+            Category.name,
+            func.coalesce(func.sum(Expense.amount), 0).label("total"),
+            func.count(Expense.id).label("count"),
+        )
+        .join(Category, Category.id == Expense.category_id)
+        .where(Expense.user_id == user_id)
+    )
+    if date_from:
+        stmt = stmt.where(Expense.expense_date >= date_from)
+    if date_to:
+        stmt = stmt.where(Expense.expense_date <= date_to)
+    stmt = (
+        stmt.group_by(Category.id, Category.slug, Category.name)
+        .order_by(func.sum(Expense.amount).desc())
+        .limit(limit)
+    )
+    rows = session.exec(stmt).all()
+    items = [
+        {
+            "category_id": str(cid),
+            "slug": slug,
+            "name": name,
+            "total": str(total),
+            "count": int(count),
+        }
+        for cid, slug, name, total, count in rows
+    ]
+    return {
+        "from": date_from.isoformat() if date_from else None,
+        "to": date_to.isoformat() if date_to else None,
+        "items": items,
+    }

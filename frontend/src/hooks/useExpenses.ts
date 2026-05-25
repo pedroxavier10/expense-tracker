@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { EXPENSE_CREATED_EVENT } from "@/components/ChatActionsProvider";
 import * as api from "@/lib/api";
 import type { Expense, ExpenseFilters } from "@/types/api";
 
@@ -39,6 +40,12 @@ export function useExpenses(filters: ExpenseFilters) {
   }, [JSON.stringify(filters)]);
 
   const refresh = useCallback(() => fetchExpenses(false), [fetchExpenses]);
+
+  useEffect(() => {
+    const handler = () => fetchExpenses(false);
+    window.addEventListener(EXPENSE_CREATED_EVENT, handler);
+    return () => window.removeEventListener(EXPENSE_CREATED_EVENT, handler);
+  }, [fetchExpenses]);
 
   return { expenses, total, loading, error, refresh };
 }

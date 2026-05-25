@@ -7,28 +7,42 @@ category slug *before* calling the tool. The tool itself does no NLP — it
 just validates the structured input and writes to the database.
 """
 
+from datetime import date
+from decimal import Decimal
 from uuid import UUID
 
 from fastapi import HTTPException
+from pydantic import BaseModel, Field
 from sqlmodel import Session
 
 from app.schemas.expense import ExpenseCreate
 from app.services import category_service, expense_service
 
 
-class AddExpenseInput(ExpenseCreate):
-    """Reuses ExpenseCreate so the schema stays a single source of truth.
+class AddExpenseInput(BaseModel):
+    """Input model for the add_expense LLM tool.
 
-    If the LLM should be allowed to pass a category *slug* instead of an id,
-    extend this with a `category_slug: str | None` field and resolve it
-    inside the handler.
+    Uses float for amount to avoid Decimal's lookahead-regex JSON Schema,
+    which is rejected by ECMA-262-strict validators (e.g. Groq). Conversion
+    to Decimal happens inside the handler before calling the service.
     """
+
+    amount: float = Field(gt=0)
+    expense_date: date
+    description: str = Field(min_length=1, max_length=500)
+    category_id: UUID
 
 
 def add_expense(session: Session, user_id: UUID, payload: AddExpenseInput) -> dict:
     if not category_service.get_category(session, payload.category_id):
         raise HTTPException(status_code=404, detail="Category not found")
-    expense = expense_service.create_expense(session, user_id, payload)
+    expense_data = ExpenseCreate(
+        amount=Decimal(str(payload.amount)),
+        expense_date=payload.expense_date,
+        description=payload.description,
+        category_id=payload.category_id,
+    )
+    expense = expense_service.create_expense(session, user_id, expense_data)
     return {
         "id": str(expense.id),
         "amount": str(expense.amount),
