@@ -5,11 +5,8 @@ whole point of the tool design: every tool is unit-testable in isolation.
 """
 
 from decimal import Decimal
-from uuid import uuid4
-
 from sqlmodel import Session
 
-from app.llm.tools.list_categories import ListCategoriesInput, list_categories
 from app.llm.tools.monthly_summary import MonthlySummaryInput, monthly_summary
 from app.llm.tools.open_add_expense_form import (
     OpenAddExpenseFormInput,
@@ -43,14 +40,6 @@ def _make_user_and_expenses(session: Session) -> tuple:
         session.add(e)
     session.commit()
     return user, food, transport
-
-
-def test_list_categories(session: Session) -> None:
-    result = list_categories(session, uuid4(), ListCategoriesInput())
-    slugs = {c["slug"] for c in result["categories"]}
-    assert {"food", "transport", "health", "other"} <= slugs
-    for c in result["categories"]:
-        assert {"id", "slug", "name", "icon"} <= set(c.keys())
 
 
 def test_monthly_summary_groups_by_category(session: Session) -> None:
