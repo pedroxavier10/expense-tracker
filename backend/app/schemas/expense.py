@@ -47,6 +47,8 @@ class ExpenseRead(BaseModel):
     expense_date: date
     description: str
     category: CategoryRead
+    is_recurring: bool
+    recurring_expense_id: UUID | None
     created_at: datetime
     updated_at: datetime
 

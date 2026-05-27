@@ -87,8 +87,13 @@ export function ExpenseList({
                     </span>
                   </div>
 
-                  <div className="flex-1 min-w-0 text-ink truncate">
-                    {e.description}
+                  <div className="flex-1 min-w-0 flex items-center gap-2 min-w-0">
+                    <span className="text-ink truncate">{e.description}</span>
+                    {e.is_recurring && (
+                      <span className="shrink-0 inline-flex items-center text-xs px-1.5 py-0.5 rounded border border-paper-line text-ink-muted bg-paper-line/30">
+                        {t("recurringBadge")}
+                      </span>
+                    )}
                   </div>
 
                   <div className="text-amount text-ink">

@@ -31,6 +31,16 @@ const NAV_ITEMS = [
     ),
   },
   {
+    href: "/recurring",
+    key: "recurring" as const,
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 9a5 5 0 1 1 1.5 3.5" />
+        <path d="M4 13V9h4" />
+      </svg>
+    ),
+  },
+  {
     href: "/categories",
     key: "categories" as const,
     icon: (

@@ -18,6 +18,7 @@
   "sidebar": {
     "dashboard": "Painel",
     "expenses": "Despesas",
+    "recurring": "Recorrentes",
     "categories": "Categorias",
     "reports": "Relatórios",
     "chat": "Chat",
@@ -53,7 +54,31 @@
     "update": "Atualizar",
     "noMatchingExpenses": "Nenhuma despesa corresponde a estes filtros.",
     "shown": "(mostradas)",
-    "expenseCount": "{count, plural, one {# despesa} other {# despesas}}"
+    "expenseCount": "{count, plural, one {# despesa} other {# despesas}}",
+    "recurringBadge": "Recorrente"
+  },
+  "recurring": {
+    "title": "Despesas Recorrentes",
+    "subtitle": "Regras que criam despesas automaticamente todos os meses.",
+    "addRule": "Adicionar regra",
+    "addRuleAction": "Adicionar",
+    "update": "Atualizar",
+    "noRules": "Ainda não tens regras de despesas recorrentes.",
+    "dayOfMonth": "Dia do mês",
+    "dayOfMonthHelp": "Se o mês tiver menos dias, será usado o último dia.",
+    "endDate": "Data de fim",
+    "endDateOptional": "Opcional — deixa em branco para indefinido",
+    "active": "Ativa",
+    "paused": "Pausada",
+    "pauseRule": "Pausar",
+    "resumeRule": "Retomar",
+    "everyDay": "Dia {day} de cada mês",
+    "confirmMaterializeTitle": "Criar despesa para este mês?",
+    "confirmMaterializeBody": "Queres criar a despesa de {month} agora?",
+    "confirmYes": "Sim, criar",
+    "confirmNo": "Não por agora",
+    "materializeSuccess": "Despesa de {month} criada com sucesso.",
+    "saveFailed": "Falha ao guardar"
   },
   "forms": {
     "amount": "Valor",

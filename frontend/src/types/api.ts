@@ -18,9 +18,34 @@ export interface Expense {
   expense_date: string; // ISO date (YYYY-MM-DD)
   description: string;
   category: Category;
+  is_recurring: boolean;
+  recurring_expense_id: string | null;
   created_at: string;
   updated_at: string;
 }
+
+export interface RecurringExpense {
+  id: string;
+  amount: string;
+  description: string;
+  day_of_month: number;
+  is_active: boolean;
+  end_date: string | null;
+  category: Category;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RecurringExpenseCreatePayload {
+  amount: string;
+  description: string;
+  day_of_month: number;
+  category_id: string;
+  end_date?: string | null;
+  is_active?: boolean;
+}
+
+export type RecurringExpenseUpdatePayload = Partial<RecurringExpenseCreatePayload>;
 
 export interface ExpenseListResponse {
   items: Expense[];

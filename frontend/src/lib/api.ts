@@ -17,6 +17,9 @@ import type {
   ExpenseFilters,
   ExpenseListResponse,
   ExpenseUpdatePayload,
+  RecurringExpense,
+  RecurringExpenseCreatePayload,
+  RecurringExpenseUpdatePayload,
   Token,
   User,
   UserUpdatePayload,
@@ -164,6 +167,43 @@ export async function updateExpense(
 
 export async function deleteExpense(id: string): Promise<void> {
   return request<void>(`/expenses/${id}`, { method: "DELETE" });
+}
+
+// ---------- Recurring Expenses ----------
+
+export async function listRecurringExpenses(): Promise<RecurringExpense[]> {
+  return request<RecurringExpense[]>("/recurring-expenses");
+}
+
+export async function createRecurringExpense(
+  payload: RecurringExpenseCreatePayload
+): Promise<RecurringExpense> {
+  return request<RecurringExpense>("/recurring-expenses", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateRecurringExpense(
+  id: string,
+  payload: RecurringExpenseUpdatePayload
+): Promise<RecurringExpense> {
+  return request<RecurringExpense>(`/recurring-expenses/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteRecurringExpense(id: string): Promise<void> {
+  return request<void>(`/recurring-expenses/${id}`, { method: "DELETE" });
+}
+
+export async function materializeRecurringExpenseCurrentMonth(
+  id: string
+): Promise<Expense> {
+  return request<Expense>(`/recurring-expenses/${id}/materialize-current-month`, {
+    method: "POST",
+  });
 }
 
 // ---------- Chat (SSE streaming) ----------

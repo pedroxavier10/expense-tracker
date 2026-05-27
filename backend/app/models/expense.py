@@ -10,7 +10,7 @@ from decimal import Decimal
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
-from sqlalchemy import Numeric
+from sqlalchemy import ForeignKey, Numeric
 from sqlmodel import Column, Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
@@ -32,6 +32,19 @@ class Expense(SQLModel, table=True):
 
     expense_date: date = Field(index=True)
     description: str = Field(max_length=500)
+
+    # SET NULL on delete: when the rule is removed, is_recurring stays True so
+    # the UI can still show the recurring badge even without the rule link.
+    recurring_expense_id: UUID | None = Field(
+        default=None,
+        sa_column=Column(
+            "recurring_expense_id",
+            ForeignKey("recurring_expenses.id", ondelete="SET NULL"),
+            nullable=True,
+            index=True,
+        ),
+    )
+    is_recurring: bool = Field(default=False)
 
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
