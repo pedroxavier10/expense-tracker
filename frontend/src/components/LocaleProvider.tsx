@@ -87,6 +87,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       <NextIntlClientProvider
         locale={toIntlLocale(locale)}
         messages={MESSAGES[locale]}
+        timeZone="UTC"
       >
         {children}
       </NextIntlClientProvider>
