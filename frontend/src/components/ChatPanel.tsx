@@ -18,7 +18,7 @@ import {
   type FormEvent,
 } from "react";
 
-import { useChatActions } from "@/components/ChatActionsProvider";
+import { useChatActions, EXPENSE_CREATED_EVENT } from "@/components/ChatActionsProvider";
 import * as api from "@/lib/api";
 import type { ChatMessage, ChatStreamEvent } from "@/types/api";
 import type { ExpenseFormInitialValues } from "@/components/ExpenseForm";
@@ -102,6 +102,9 @@ export function ChatPanel({ variant }: Props) {
           setActiveTool(event.name);
         } else if (event.type === "tool_result") {
           setActiveTool(null);
+          if (event.name === "add_expense" && event.ok) {
+            window.dispatchEvent(new CustomEvent(EXPENSE_CREATED_EVENT));
+          }
         } else if (event.type === "client_action") {
           if (event.action === "open_add_expense_form") {
             openAddExpense(isExpenseFormInitialValues(event.payload.prefill as Record<string, unknown> ?? {}));

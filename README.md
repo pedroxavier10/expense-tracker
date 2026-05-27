@@ -1,4 +1,4 @@
-# Ledger — Personal Expense Tracker
+# Ledger-x — Personal Expense Tracker
 
 A small, well-built full-stack expense tracker for personal use. Designed
 to grow into a mobile app and gain a natural-language interface without
