@@ -8,7 +8,7 @@ on:
 
 jobs:
   lint-and-typecheck:
-    name: ESLint & TypeScript
+    name: Frontend Quality Checks
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -16,6 +16,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -57,16 +59,68 @@ jobs:
             } >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Check translation key parity
+        id: i18n
+        run: |
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- frontend/messages/ || true)
+          if [ -z "$CHANGED" ]; then
+            echo "No translation files changed — skipping key parity check."
+            echo "failed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "Translation files changed: $CHANGED"
+
+          MSGS=frontend/messages
+          REF="$MSGS/en.json"
+          REF_KEYS=$(jq -r '[paths(scalars)] | map(join(".")) | sort | .[]' "$REF")
+          rm -f /tmp/i18n-output.txt
+          HAS_ERROR=false
+
+          for FILE in "$MSGS"/*.json; do
+            [ -f "$FILE" ] || continue
+            [ "$FILE" = "$REF" ] && continue
+            FILE_NAME=$(basename "$FILE")
+            FILE_KEYS=$(jq -r '[paths(scalars)] | map(join(".")) | sort | .[]' "$FILE")
+
+            MISSING=$(comm -23 <(echo "$REF_KEYS") <(echo "$FILE_KEYS"))
+            EXTRA=$(comm -13 <(echo "$REF_KEYS") <(echo "$FILE_KEYS"))
+
+            if [ -n "$MISSING" ]; then
+              echo "Keys in en.json missing from $FILE_NAME:" | tee -a /tmp/i18n-output.txt
+              echo "$MISSING" | sed 's/^/  - /' | tee -a /tmp/i18n-output.txt
+              HAS_ERROR=true
+            fi
+            if [ -n "$EXTRA" ]; then
+              echo "Keys in $FILE_NAME missing from en.json:" | tee -a /tmp/i18n-output.txt
+              echo "$EXTRA" | sed 's/^/  - /' | tee -a /tmp/i18n-output.txt
+              HAS_ERROR=true
+            fi
+          done
+
+          if [ "$HAS_ERROR" = true ]; then
+            echo "failed=true" >> "$GITHUB_OUTPUT"
+            {
+              echo "output<<EOF"
+              cat /tmp/i18n-output.txt
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "All translation files share the same keys."
+            echo "failed=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Post or update PR comment (errors found)
-        if: steps.lint.outputs.failed == 'true' || steps.typecheck.outputs.failed == 'true'
+        if: steps.lint.outputs.failed == 'true' || steps.typecheck.outputs.failed == 'true' || steps.i18n.outputs.failed == 'true'
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const lintFailed   = '${{ steps.lint.outputs.failed }}'      === 'true';
-            const tcFailed     = '${{ steps.typecheck.outputs.failed }}' === 'true';
-            const lintOutput   = `${{ steps.lint.outputs.output }}`;
-            const tcOutput     = `${{ steps.typecheck.outputs.output }}`;
+            const lintFailed = '${{ steps.lint.outputs.failed }}'      === 'true';
+            const tcFailed   = '${{ steps.typecheck.outputs.failed }}' === 'true';
+            const i18nFailed = '${{ steps.i18n.outputs.failed }}'      === 'true';
+            const lintOutput = `${{ steps.lint.outputs.output }}`;
+            const tcOutput   = `${{ steps.typecheck.outputs.output }}`;
+            const i18nOutput = `${{ steps.i18n.outputs.output }}`;
 
             const sections = [];
             if (lintFailed) {
@@ -75,17 +129,21 @@ jobs:
             if (tcFailed) {
               sections.push('### TypeScript type-check\n```\n' + tcOutput + '\n```');
             }
+            if (i18nFailed) {
+              sections.push('### Translation key parity\n```\n' + i18nOutput + '\n```');
+            }
 
             const body = [
               '## ⚠️ Erros de qualidade no frontend',
               '',
-              'Este PR introduz erros de **ESLint** e/ou **TypeScript** no frontend.',
+              'Este PR introduz erros de **ESLint**, **TypeScript** e/ou **traduções** no frontend.',
               '',
               sections.join('\n\n'),
               '',
               '**Como resolver:**',
               '- ESLint: `cd frontend && npm run lint`',
               '- TypeScript: `cd frontend && npm run type-check`',
+              '- Traduções: garantir que todos os ficheiros em `messages/` têm exatamente as mesmas chaves',
               '',
               '_O check passa automaticamente quando os erros forem corrigidos._',
             ].join('\n');
@@ -116,7 +174,7 @@ jobs:
             }
 
       - name: Resolve PR comment (no errors)
-        if: steps.lint.outputs.failed == 'false' && steps.typecheck.outputs.failed == 'false'
+        if: steps.lint.outputs.failed == 'false' && steps.typecheck.outputs.failed == 'false' && steps.i18n.outputs.failed == 'false'
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -135,16 +193,16 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 comment_id: existing.id,
-                body: '## ✅ Frontend sem erros\n\nESLint e TypeScript type-check passaram. Check resolvido.',
+                body: '## ✅ Frontend sem erros\n\nESLint, TypeScript type-check e paridade de traduções passaram. Check resolvido.',
               });
             }
 
       - name: Fail if errors found
-        if: steps.lint.outputs.failed == 'true' || steps.typecheck.outputs.failed == 'true'
+        if: steps.lint.outputs.failed == 'true' || steps.typecheck.outputs.failed == 'true' || steps.i18n.outputs.failed == 'true'
         run: |
-          echo "❌ ESLint ou TypeScript type-check falharam."
+          echo "❌ ESLint, TypeScript type-check ou verificação de traduções falharam."
           exit 1
 
       - name: Pass
-        if: steps.lint.outputs.failed == 'false' && steps.typecheck.outputs.failed == 'false'
-        run: echo "✅ ESLint e TypeScript type-check passaram."
+        if: steps.lint.outputs.failed == 'false' && steps.typecheck.outputs.failed == 'false' && steps.i18n.outputs.failed == 'false'
+        run: echo "✅ ESLint, TypeScript type-check e paridade de traduções passaram."

@@ -53,7 +53,12 @@ export interface User {
   id: string;
   email: string;
   is_active: boolean;
+  language: "en" | "pt";
   created_at: string;
+}
+
+export interface UserUpdatePayload {
+  language?: "en" | "pt";
 }
 
 export interface Token {

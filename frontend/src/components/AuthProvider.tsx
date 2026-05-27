@@ -14,7 +14,9 @@ import {
   type ReactNode,
 } from "react";
 
+import { useLocale } from "@/components/LocaleProvider";
 import * as api from "@/lib/api";
+import { isLocale } from "@/lib/i18n";
 import type { User } from "@/types/api";
 
 interface AuthState {
@@ -29,6 +31,18 @@ const AuthContext = createContext<AuthState | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { setLocale } = useLocale();
+
+  const adoptUser = useCallback(
+    (me: User) => {
+      setUser(me);
+      // Mirror the backend-preferred language locally without re-PATCHing.
+      if (me.language && isLocale(me.language)) {
+        setLocale(me.language, { persist: false });
+      }
+    },
+    [setLocale],
+  );
 
   useEffect(() => {
     const token = api.getToken();
@@ -38,16 +52,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     api
       .getMe()
-      .then(setUser)
+      .then(adoptUser)
       .catch(() => api.clearToken())
       .finally(() => setLoading(false));
-  }, []);
+  }, [adoptUser]);
 
-  const login = useCallback(async (email: string, password: string) => {
-    await api.login(email, password);
-    const me = await api.getMe();
-    setUser(me);
-  }, []);
+  const login = useCallback(
+    async (email: string, password: string) => {
+      await api.login(email, password);
+      const me = await api.getMe();
+      adoptUser(me);
+    },
+    [adoptUser],
+  );
 
   const logout = useCallback(() => {
     api.logout();

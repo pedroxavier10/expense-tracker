@@ -29,7 +29,9 @@ async def stream_chat(
     payload: ChatRequest, session: SessionDep, current_user: CurrentUser
 ) -> StreamingResponse:
     return StreamingResponse(
-        chat_service.stream_chat(session, current_user.id, payload),
+        chat_service.stream_chat(
+            session, current_user.id, payload, language=current_user.language
+        ),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",

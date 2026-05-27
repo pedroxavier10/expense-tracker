@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
+
+import { LocaleProvider } from "@/components/LocaleProvider";
 import "./globals.css";
 
 const sans = Inter({
@@ -40,7 +42,9 @@ export default function RootLayout({
       className={`${sans.variable} ${display.variable} ${mono.variable}`}
     >
       <body>
-        <div className="relative z-10">{children}</div>
+        <LocaleProvider>
+          <div className="relative z-10">{children}</div>
+        </LocaleProvider>
       </body>
     </html>
   );

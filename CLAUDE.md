@@ -81,13 +81,15 @@ Key FastAPI dependencies injected everywhere:
 
 - **`lib/api.ts`** — Single fetch wrapper; injects Bearer token from `localStorage`; throws `ApiError` on failure
 - **`types/api.ts`** — Hand-written TypeScript mirrors of backend Pydantic schemas; keep in sync manually
-- **`components/`** — `AuthProvider` (context), `Dashboard` (main coordinator), `ExpenseForm`, `ExpenseList`, `FilterBar`, `LoginForm`
-- **`app/`** — Next.js App Router; `layout.tsx` sets fonts, `page.tsx` wraps Dashboard in AuthProvider
+- **`components/`** — `AuthProvider` (context), `LocaleProvider` (i18n state), `Dashboard` (main coordinator), `ExpenseForm`, `ExpenseList`, `FilterBar`, `LoginForm`
+- **`app/`** — Next.js App Router; `layout.tsx` sets fonts and mounts `LocaleProvider`; `page.tsx` wraps Dashboard in AuthProvider
+- **`messages/`** — `en.json` / `pt.json` translation namespaces consumed by `next-intl`
 
 ### API endpoints
 ```
 POST   /api/v1/auth/login/json        # JSON login (SPA)
 GET    /api/v1/auth/me
+PATCH  /api/v1/auth/me                # update current-user preferences (e.g. {"language": "pt"})
 GET    /api/v1/expenses               # filters: category_id, month, date_from, date_to, description_contains, limit, offset
 POST   /api/v1/expenses
 PATCH  /api/v1/expenses/{id}
@@ -108,6 +110,14 @@ GET    /api/v1/categories
 **TypeScript:**
 - All monetary amounts arrive as strings from the API
 - Dates are ISO `YYYY-MM-DD` strings
+
+**Internationalization:**
+- Two locales supported: `en` (default) and `pt` (European Portuguese)
+- Strings live in `frontend/messages/{en,pt}.json`, grouped by namespace (`common`, `sidebar`, `dashboard`, `expenses`, `chat`, …)
+- Components read strings via `useTranslations("namespace")` from `next-intl`; never hardcode user-facing text
+- Locale state is managed by `LocaleProvider` (`components/LocaleProvider.tsx`) — `useLocale()` exposes `{ locale, setLocale }`
+- For locale-aware currency/date use `useFormat()` (`lib/useFormat.ts`) instead of the static `formatCurrency` / `formatDate`
+- The selected locale is persisted on `users.language` and mirrored to `localStorage["app_locale"]`; the chat system prompt picks the locale from there too
 
 ## Project-Local Agents and Skills
 

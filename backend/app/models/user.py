@@ -20,4 +20,5 @@ class User(SQLModel, table=True):
     email: str = Field(unique=True, index=True, max_length=255)
     hashed_password: str = Field(max_length=255)
     is_active: bool = Field(default=True)
+    language: str = Field(default="en", max_length=8)
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))

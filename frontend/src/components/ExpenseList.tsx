@@ -1,9 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { ExpenseForm } from "@/components/ExpenseForm";
-import { formatCurrency, formatDate } from "@/lib/format";
+import { useFormat } from "@/lib/useFormat";
 import type {
   Category,
   Expense,
@@ -27,13 +28,16 @@ export function ExpenseList({
 }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const t = useTranslations("expenses");
+  const tCommon = useTranslations("common");
+  const { formatCurrency, formatDate } = useFormat();
 
   const totalAmount = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
 
   if (expenses.length === 0) {
     return (
       <div className="bg-paper-card border border-paper-line rounded p-12 text-center shadow-card">
-        <p className="text-ink-muted">No expenses match these filters.</p>
+        <p className="text-ink-muted">{t("noMatchingExpenses")}</p>
       </div>
     );
   }
@@ -42,11 +46,11 @@ export function ExpenseList({
     <div className="bg-paper-card border border-paper-line rounded shadow-card overflow-hidden">
       <div className="px-4 py-3 border-b border-paper-line flex items-baseline justify-between">
         <div className="text-xs uppercase tracking-[0.12em] text-ink-muted font-medium">
-          {total} {total === 1 ? "expense" : "expenses"}
+          {t("expenseCount", { count: total })}
         </div>
         <div className="text-amount text-lg text-ink">
           {formatCurrency(totalAmount)}
-          <span className="text-xs text-ink-muted ml-2">(shown)</span>
+          <span className="text-xs text-ink-muted ml-2">{t("shown")}</span>
         </div>
       </div>
 
@@ -62,7 +66,7 @@ export function ExpenseList({
                   <ExpenseForm
                     categories={categories}
                     initial={e}
-                    submitLabel="Update"
+                    submitLabel={t("update")}
                     onCancel={() => setEditingId(null)}
                     onSubmit={async (data) => {
                       await onUpdate(e.id, data);
@@ -95,7 +99,7 @@ export function ExpenseList({
                     {isConfirming ? (
                       <>
                         <span className="text-xs text-ink-muted mr-2">
-                          Sure?
+                          {tCommon("sure")}
                         </span>
                         <button
                           className="btn-danger"
@@ -104,13 +108,13 @@ export function ExpenseList({
                             setConfirmDeleteId(null);
                           }}
                         >
-                          Delete
+                          {tCommon("delete")}
                         </button>
                         <button
                           className="btn-ghost"
                           onClick={() => setConfirmDeleteId(null)}
                         >
-                          No
+                          {tCommon("no")}
                         </button>
                       </>
                     ) : (
@@ -119,13 +123,13 @@ export function ExpenseList({
                           className="btn-ghost"
                           onClick={() => setEditingId(e.id)}
                         >
-                          Edit
+                          {tCommon("edit")}
                         </button>
                         <button
                           className="btn-danger"
                           onClick={() => setConfirmDeleteId(e.id)}
                         >
-                          Delete
+                          {tCommon("delete")}
                         </button>
                       </>
                     )}

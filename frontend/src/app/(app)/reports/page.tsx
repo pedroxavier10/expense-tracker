@@ -1,8 +1,11 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { ReportsCharts } from "@/components/ReportsCharts";
+import { useLocale } from "@/components/LocaleProvider";
 import * as api from "@/lib/api";
+import { toIntlLocale } from "@/lib/i18n";
 import type { Expense } from "@/types/api";
 
 function monthsAgo(n: number): string {
@@ -13,9 +16,9 @@ function monthsAgo(n: number): string {
   return `${y}-${m}`;
 }
 
-function monthLabel(isoMonth: string): string {
+function monthLabel(isoMonth: string, intlLocale: string): string {
   const [y, m] = isoMonth.split("-");
-  return new Date(Number(y), Number(m) - 1, 1).toLocaleString("pt-PT", {
+  return new Date(Number(y), Number(m) - 1, 1).toLocaleString(intlLocale, {
     month: "short",
     year: "2-digit",
   });
@@ -24,6 +27,9 @@ function monthLabel(isoMonth: string): string {
 export default function ReportsPage() {
   const [allExpenses, setAllExpenses] = useState<Record<string, Expense[]>>({});
   const [loading, setLoading] = useState(true);
+  const t = useTranslations("reports");
+  const { locale } = useLocale();
+  const intlLocale = toIntlLocale(locale);
 
   const months = useMemo(() => Array.from({ length: 6 }, (_, i) => monthsAgo(5 - i)), []);
 
@@ -45,10 +51,10 @@ export default function ReportsPage() {
   const monthlyData = useMemo(
     () =>
       months.map((m) => ({
-        month: monthLabel(m),
+        month: monthLabel(m, intlLocale),
         total: (allExpenses[m] ?? []).reduce((sum, e) => sum + Number(e.amount), 0),
       })),
-    [months, allExpenses]
+    [months, allExpenses, intlLocale]
   );
 
   const categoryData = useMemo(() => {
@@ -71,8 +77,8 @@ export default function ReportsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-display text-3xl text-ink">Reports</h1>
-        <p className="text-sm text-ink-muted mt-1">Spending trends and breakdown.</p>
+        <h1 className="font-display text-3xl text-ink">{t("title")}</h1>
+        <p className="text-sm text-ink-muted mt-1">{t("subtitle")}</p>
       </div>
 
       <ReportsCharts

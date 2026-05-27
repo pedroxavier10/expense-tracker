@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { AddExpenseModal } from "@/components/AddExpenseModal";
 import { ExpenseList } from "@/components/ExpenseList";
@@ -38,6 +39,8 @@ export default function ExpensesPage() {
   const [showModal, setShowModal] = useState(false);
   const query = useMemo(() => filtersToQuery(filters), [filters]);
   const { expenses, total, loading, error, refresh } = useExpenses(query);
+  const t = useTranslations("expenses");
+  const tCommon = useTranslations("common");
 
   const handleCreate = useCallback(
     async (data: ExpenseCreatePayload | ExpenseUpdatePayload) => {
@@ -67,14 +70,14 @@ export default function ExpensesPage() {
     <div className="space-y-8">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="font-display text-3xl text-ink">Expenses</h1>
-          <p className="text-sm text-ink-muted mt-1">Browse and manage your spending records.</p>
+          <h1 className="font-display text-3xl text-ink">{t("title")}</h1>
+          <p className="text-sm text-ink-muted mt-1">{t("subtitle")}</p>
         </div>
         <button className="btn-primary" onClick={() => setShowModal(true)}>
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="M7 1v12M1 7h12" />
           </svg>
-          Add Expense
+          {t("addExpense")}
         </button>
       </div>
 
@@ -93,7 +96,7 @@ export default function ExpensesPage() {
         )}
 
         {loading ? (
-          <p className="text-ink-muted text-sm">Loading…</p>
+          <p className="text-ink-muted text-sm">{tCommon("loading")}</p>
         ) : (
           <ExpenseList
             expenses={expenses}

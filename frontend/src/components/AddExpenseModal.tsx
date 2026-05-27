@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { ExpenseForm, type ExpenseFormInitialValues } from "@/components/ExpenseForm";
 import type { Category, ExpenseCreatePayload, ExpenseUpdatePayload } from "@/types/api";
@@ -12,6 +13,8 @@ interface Props {
 }
 
 export function AddExpenseModal({ categories, onSubmit, onClose, initialValues }: Props) {
+  const t = useTranslations("expenses");
+  const tCommon = useTranslations("common");
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -34,9 +37,9 @@ export function AddExpenseModal({ categories, onSubmit, onClose, initialValues }
       <div className="relative bg-paper-card border border-paper-line rounded shadow-card w-full max-w-lg mx-4 p-6">
         <div className="flex items-center justify-between mb-5">
           <h2 id="modal-title" className="font-display text-2xl text-ink">
-            Add Expense
+            {t("addExpense")}
           </h2>
-          <button onClick={onClose} className="btn-ghost" aria-label="Close">
+          <button onClick={onClose} className="btn-ghost" aria-label={tCommon("close")}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
               <path d="M2 2l12 12M14 2 2 14" />
             </svg>
@@ -49,7 +52,7 @@ export function AddExpenseModal({ categories, onSubmit, onClose, initialValues }
             await onSubmit(data);
             onClose();
           }}
-          submitLabel="Add expense"
+          submitLabel={t("addExpenseAction")}
           onCancel={onClose}
         />
       </div>

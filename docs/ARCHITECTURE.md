@@ -109,3 +109,22 @@ a kit would dilute the aesthetic and add weight.
 Most expense apps look like accounting software. This one looks like a
 notebook: serif display font, warm paper background, monospace amounts,
 minimal chrome. Personal apps should feel personal.
+
+## 11. i18n: client-side translations, server-stored preference
+
+Translations (English + European Portuguese) live entirely on the frontend
+via [`next-intl`](https://next-intl-docs.vercel.app/) — `frontend/messages/{en,pt}.json`
+grouped by namespace, consumed through `useTranslations`. The backend
+stores only the chosen language code on `users.language` (default `en`)
+and reads it back to parameterize the chat system prompt
+(`LOCALE_INSTRUCTION[lang]` in `chat_service.py`), so the assistant
+answers in the same language as the UI.
+
+**Why split this way:**
+
+- The translation catalogue is a UI concern; the backend stays free of
+  English/Portuguese strings.
+- A single source of truth (`users.language`) keeps every device — web
+  today, mobile tomorrow — and the chat bot in sync after one PATCH.
+- Adding a third language is a JSON file + one literal in `Language`
+  + one entry in `LOCALE_INSTRUCTION`. No schema migration.

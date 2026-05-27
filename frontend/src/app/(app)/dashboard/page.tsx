@@ -1,13 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { AddExpenseModal } from "@/components/AddExpenseModal";
 import { SummaryCard } from "@/components/SummaryCard";
+import { useLocale } from "@/components/LocaleProvider";
 import { useCategories } from "@/hooks/useCategories";
 import { useExpenses } from "@/hooks/useExpenses";
 import * as api from "@/lib/api";
-import { currentMonthIso, formatCurrency, formatDate } from "@/lib/format";
+import { currentMonthIso } from "@/lib/format";
+import { toIntlLocale } from "@/lib/i18n";
+import { useFormat } from "@/lib/useFormat";
 import type { ExpenseCreatePayload, ExpenseUpdatePayload } from "@/types/api";
 
 export default function DashboardPage() {
@@ -15,6 +19,10 @@ export default function DashboardPage() {
   const query = useMemo(() => ({ month: currentMonthIso(), limit: 500 }), []);
   const { expenses, loading, refresh } = useExpenses(query);
   const [showModal, setShowModal] = useState(false);
+  const t = useTranslations("dashboard");
+  const tCommon = useTranslations("common");
+  const { formatCurrency, formatDate } = useFormat();
+  const { locale } = useLocale();
 
   const monthlyTotal = useMemo(
     () => expenses.reduce((sum, e) => sum + Number(e.amount), 0),
@@ -43,32 +51,32 @@ export default function DashboardPage() {
   );
 
   const now = new Date();
-  const monthLabel = now.toLocaleString("pt-PT", { month: "long", year: "numeric" });
+  const monthLabel = now.toLocaleString(toIntlLocale(locale), { month: "long", year: "numeric" });
 
   return (
     <div className="space-y-8">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="font-display text-3xl text-ink">Dashboard</h1>
+          <h1 className="font-display text-3xl text-ink">{t("title")}</h1>
           <p className="text-sm text-ink-muted mt-1 capitalize">{monthLabel}</p>
         </div>
         <button className="btn-primary" onClick={() => setShowModal(true)}>
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="M7 1v12M1 7h12" />
           </svg>
-          Add Expense
+          {t("addExpense")}
         </button>
       </div>
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 gap-4">
         <SummaryCard
-          title="Spent this month"
+          title={t("spentThisMonth")}
           value={loading ? "—" : formatCurrency(monthlyTotal)}
-          subtext={loading ? undefined : `${expenses.length} expense${expenses.length !== 1 ? "s" : ""}`}
+          subtext={loading ? undefined : t("expenseCount", { count: expenses.length })}
         />
         <SummaryCard
-          title="Top category"
+          title={t("topCategory")}
           value={loading || !topCategory ? "—" : `${topCategory.icon ?? ""} ${topCategory.name}`.trim()}
           subtext={topCategory ? formatCurrency(topCategory.amount) : undefined}
         />
@@ -77,20 +85,20 @@ export default function DashboardPage() {
       {/* Recent expenses */}
       <section>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-display text-xl text-ink">Recent</h2>
+          <h2 className="font-display text-xl text-ink">{t("recent")}</h2>
           <Link href="/expenses" className="text-sm text-ink-muted hover:text-ink transition-colors">
-            View all →
+            {t("viewAll")}
           </Link>
         </div>
 
         <div className="bg-paper-card border border-paper-line rounded shadow-card divide-y divide-paper-line">
           {loading ? (
-            <p className="px-4 py-3 text-sm text-ink-muted">Loading…</p>
+            <p className="px-4 py-3 text-sm text-ink-muted">{tCommon("loading")}</p>
           ) : recent.length === 0 ? (
             <p className="px-4 py-5 text-sm text-ink-muted text-center">
-              No expenses this month.{" "}
+              {t("noExpensesThisMonth")}{" "}
               <button onClick={() => setShowModal(true)} className="underline hover:text-ink">
-                Add one
+                {t("addOne")}
               </button>
             </p>
           ) : (

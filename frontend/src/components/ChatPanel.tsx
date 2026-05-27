@@ -10,9 +10,11 @@
  *   dispatches it via `ChatActionsContext` so the rest of the app reacts.
  */
 
+import { useTranslations } from "next-intl";
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type FormEvent,
@@ -26,12 +28,6 @@ import type { ExpenseFormInitialValues } from "@/components/ExpenseForm";
 interface Props {
   variant: "page" | "dialog";
 }
-
-const INITIAL_GREETING: ChatMessage = {
-  role: "assistant",
-  content:
-    "Olá! Posso ajudar a registar despesas, consultar gastos passados ou ver onde gastas mais. Em que te posso ajudar?",
-};
 
 function isExpenseFormInitialValues(
   value: Record<string, unknown>,
@@ -49,7 +45,12 @@ function isExpenseFormInitialValues(
 
 export function ChatPanel({ variant }: Props) {
   const { openAddExpense } = useChatActions();
-  const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_GREETING]);
+  const t = useTranslations("chat");
+  const greeting = useMemo<ChatMessage>(
+    () => ({ role: "assistant", content: t("greeting") }),
+    [t],
+  );
+  const [messages, setMessages] = useState<ChatMessage[]>([greeting]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [activeTool, setActiveTool] = useState<string | null>(null);
@@ -118,7 +119,7 @@ export function ChatPanel({ variant }: Props) {
         await api.streamChat(history, handleEvent, controller.signal);
       } catch (err) {
         if ((err as { name?: string }).name === "AbortError") return;
-        setError(err instanceof Error ? err.message : "Chat failed");
+        setError(err instanceof Error ? err.message : t("chatFailed"));
       } finally {
         setBusy(false);
         setActiveTool(null);
@@ -133,7 +134,7 @@ export function ChatPanel({ variant }: Props) {
         });
       }
     },
-    [busy, messages, openAddExpense],
+    [busy, messages, openAddExpense, t],
   );
 
   const handleSubmit = (e: FormEvent) => {
@@ -155,7 +156,7 @@ export function ChatPanel({ variant }: Props) {
         ))}
         {activeTool && (
           <div className="text-xs text-ink-muted px-2 italic">
-            a usar {humanizeTool(activeTool)}…
+            {t("usingTool", { tool: humanizeTool(t, activeTool) })}
           </div>
         )}
         {error && (
@@ -172,7 +173,7 @@ export function ChatPanel({ variant }: Props) {
         <input
           type="text"
           className="field flex-1"
-          placeholder="Escreve uma mensagem…"
+          placeholder={t("placeholder")}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           disabled={busy}
@@ -183,7 +184,7 @@ export function ChatPanel({ variant }: Props) {
           className="btn-primary"
           disabled={busy || input.trim().length === 0}
         >
-          {busy ? "…" : "Enviar"}
+          {busy ? t("sending") : t("send")}
         </button>
       </form>
     </div>
@@ -207,15 +208,20 @@ function MessageBubble({ message }: { message: ChatMessage }) {
   );
 }
 
-function humanizeTool(name: string): string {
-  const map: Record<string, string> = {
-    list_categories: "categorias",
-    search_expenses: "pesquisa de despesas",
-    monthly_summary: "resumo mensal",
-    top_categories: "categorias com maior gasto",
-    add_expense: "adicionar despesa",
-    open_add_expense_form: "formulário de despesa",
-  };
-  return map[name] ?? name;
+const TOOL_KEYS = new Set([
+  "list_categories",
+  "search_expenses",
+  "monthly_summary",
+  "top_categories",
+  "add_expense",
+  "open_add_expense_form",
+]);
+
+function humanizeTool(
+  t: ReturnType<typeof useTranslations<"chat">>,
+  name: string,
+): string {
+  if (TOOL_KEYS.has(name)) return t(`tools.${name}` as never);
+  return name;
 }
 

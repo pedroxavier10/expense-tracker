@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { todayIso } from "@/lib/format";
@@ -34,8 +35,11 @@ export function ExpenseForm({
   initialValues,
   onSubmit,
   onCancel,
-  submitLabel = "Save",
+  submitLabel,
 }: Props) {
+  const t = useTranslations("forms");
+  const tCommon = useTranslations("common");
+  const effectiveSubmitLabel = submitLabel ?? tCommon("save");
   const [amount, setAmount] = useState(
     initial?.amount ?? initialValues?.amount ?? "",
   );
@@ -73,7 +77,7 @@ export function ExpenseForm({
         setDescription("");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Save failed");
+      setError(err instanceof Error ? err.message : t("saveFailed"));
     } finally {
       setBusy(false);
     }
@@ -84,7 +88,7 @@ export function ExpenseForm({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label htmlFor="amount" className="label">
-            Amount
+            {t("amount")}
           </label>
           <input
             id="amount"
@@ -102,7 +106,7 @@ export function ExpenseForm({
 
         <div>
           <label htmlFor="date" className="label">
-            Date
+            {t("date")}
           </label>
           <input
             id="date"
@@ -117,7 +121,7 @@ export function ExpenseForm({
 
       <div>
         <label htmlFor="category" className="label">
-          Category
+          {t("category")}
         </label>
         <select
           id="category"
@@ -137,7 +141,7 @@ export function ExpenseForm({
 
       <div>
         <label htmlFor="description" className="label">
-          Description
+          {t("description")}
         </label>
         <input
           id="description"
@@ -147,7 +151,7 @@ export function ExpenseForm({
           className="field"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="e.g. Lunch at the corner café"
+          placeholder={t("descriptionPlaceholder")}
         />
       </div>
 
@@ -159,11 +163,11 @@ export function ExpenseForm({
 
       <div className="flex items-center gap-2 pt-2">
         <button type="submit" disabled={busy} className="btn-primary">
-          {busy ? "Saving…" : submitLabel}
+          {busy ? tCommon("saving") : effectiveSubmitLabel}
         </button>
         {onCancel && (
           <button type="button" onClick={onCancel} className="btn-ghost">
-            Cancel
+            {tCommon("cancel")}
           </button>
         )}
       </div>
