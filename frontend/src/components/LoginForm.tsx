@@ -35,7 +35,7 @@ export function LoginForm() {
     <div className="min-h-screen flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
         <div className="mb-12 text-center">
-          <h1 className="font-display text-5xl italic text-ink mb-2">Ledger</h1>
+          <h1 className="font-display text-5xl italic text-ink mb-2">Ledger-x</h1>
           <p className="text-ink-muted text-sm">
             A quiet place for your expenses.
           </p>

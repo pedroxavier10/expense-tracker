@@ -88,9 +88,9 @@ export function Sidebar() {
       {/* Brand */}
       <div className={`px-4 py-5 border-b border-paper-line flex items-center ${collapsed ? "justify-center" : "justify-between"}`}>
         {collapsed ? (
-          <span className="font-display italic text-xl text-ink leading-none">L</span>
+          <span className="font-display italic text-xl text-ink leading-none">Lx</span>
         ) : (
-          <span className="font-display italic text-xl text-ink leading-none">Ledger</span>
+          <span className="font-display italic text-xl text-ink leading-none">Ledger-x</span>
         )}
       </div>
 

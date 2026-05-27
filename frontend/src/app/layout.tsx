@@ -25,7 +25,7 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ledger — Expense Tracker",
+  title: "Ledger-x",
   description: "A quiet place to record what you spend.",
 };
 
