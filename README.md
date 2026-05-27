@@ -31,6 +31,7 @@ rewrites.
 | Layer    | Choice                                          |
 | -------- | ----------------------------------------------- |
 | Frontend | Next.js 15 (App Router), React 19, TypeScript, Tailwind |
+| i18n     | **next-intl** (EN + PT, runtime switching)      |
 | Backend  | FastAPI, Python 3.11+                           |
 | ORM      | **SQLModel** (SQLAlchemy 2.0 + Pydantic)        |
 | Database | PostgreSQL 16                                   |
@@ -172,6 +173,35 @@ need it. The alternative, plain SQLAlchemy + separate Pydantic schemas,
 gives more flexibility at the cost of duplicating every field definition;
 overkill for a project this size.
 
+## Translations
+
+The app ships in **English** (default) and **European Portuguese**. The
+language toggle (`EN` / `PT`) lives in the sidebar footer. Choosing a
+language:
+
+1. Updates the UI immediately (no page reload).
+2. Persists to the logged-in user's account via `PATCH /api/v1/auth/me`, so
+   the preference survives across devices and browser sessions.
+3. Tells the chat bot to reply in the same language.
+
+**Adding a new user-facing string:**
+
+1. Add the key + English text to `frontend/messages/en.json` under the
+   appropriate namespace, then the same key + Portuguese text to
+   `frontend/messages/pt.json`. Both files must stay in sync — a missing key
+   throws at render time.
+2. Use it in any client component:
+   ```tsx
+   import { useTranslations } from "next-intl";
+   const t = useTranslations("expenses");
+   <button>{t("addExpense")}</button>
+   ```
+
+**Adding a third language** requires: a new `frontend/messages/<code>.json`
+file, adding the code to `SUPPORTED_LOCALES` in `frontend/src/lib/i18n.ts`,
+and adding a `LOCALE_INSTRUCTION` entry in
+`backend/app/services/chat_service.py`. No schema migration needed.
+
 ## Built-in CRUD endpoints
 
 ```
@@ -186,6 +216,9 @@ GET    /api/v1/categories                # list all seeded categories
 POST   /api/v1/auth/login                # OAuth2 form (for Swagger UI)
 POST   /api/v1/auth/login/json           # JSON body (for SPA / mobile)
 GET    /api/v1/auth/me                   # current user
+PATCH  /api/v1/auth/me                   # update user preferences (e.g. language)
+
+POST   /api/v1/chat                      # LLM chat with tool use
 ```
 
 All `/expenses` and `/categories` endpoints require `Authorization: Bearer <token>`.

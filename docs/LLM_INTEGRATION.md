@@ -78,6 +78,17 @@ a SQL string. We avoid that entirely:
 - `delete_expense(expense_id)` — only after `search_expenses` confirms the
   match, to avoid the model deleting the wrong row.
 
+## Localized system prompt
+
+`chat_service._build_system_prompt(categories, language)` substitutes a
+`LOCALE_INSTRUCTION[language]` snippet into the prompt template, telling
+the model to answer in the user's chosen language (`en` or `pt`) and how
+to format money for that locale. The language comes from
+`current_user.language` (settable via `PATCH /api/v1/auth/me`). When you
+add a new supported language, extend both `LOCALE_INSTRUCTION` and the
+`Language` literal in `app/schemas/user.py`, then add the matching
+translation file on the frontend.
+
 ## Cost and latency tips
 
 - Tool definitions add to the prompt on every turn. Trim descriptions, and

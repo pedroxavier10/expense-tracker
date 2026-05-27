@@ -12,6 +12,7 @@ from sqlmodel import Session, select
 
 from app.core.security import hash_password, verify_password
 from app.models.user import User
+from app.schemas.user import UserUpdate
 
 
 def get_user_by_id(session: Session, user_id: UUID) -> User | None:
@@ -24,6 +25,17 @@ def get_user_by_email(session: Session, email: str) -> User | None:
 
 def create_user(session: Session, email: str, password: str) -> User:
     user = User(email=email, hashed_password=hash_password(password))
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
+
+
+def update_user(session: Session, user: User, updates: UserUpdate) -> User:
+    """Apply non-None fields from `updates` to `user` and persist."""
+    data = updates.model_dump(exclude_unset=True, exclude_none=True)
+    for field, value in data.items():
+        setattr(user, field, value)
     session.add(user)
     session.commit()
     session.refresh(user)

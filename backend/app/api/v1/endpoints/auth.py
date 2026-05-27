@@ -10,7 +10,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from app.api.deps import CurrentUser, SessionDep
 from app.core.security import create_access_token
-from app.schemas.user import LoginRequest, Token, UserRead
+from app.schemas.user import LoginRequest, Token, UserRead, UserUpdate
 from app.services import user_service
 from typing import Annotated
 from fastapi import Depends
@@ -49,3 +49,11 @@ def login_json(payload: LoginRequest, session: SessionDep) -> Token:
 @router.get("/me", response_model=UserRead, summary="Get the current user")
 def read_current_user(current_user: CurrentUser) -> UserRead:
     return UserRead.model_validate(current_user)
+
+
+@router.patch("/me", response_model=UserRead, summary="Update current user preferences")
+def update_current_user(
+    payload: UserUpdate, session: SessionDep, current_user: CurrentUser
+) -> UserRead:
+    updated = user_service.update_user(session, current_user, payload)
+    return UserRead.model_validate(updated)

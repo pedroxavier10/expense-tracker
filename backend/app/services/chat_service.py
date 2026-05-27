@@ -22,9 +22,20 @@ from app.services.category_service import list_categories as fetch_categories
 logger = logging.getLogger(__name__)
 
 
+LOCALE_INSTRUCTION = {
+    "pt": (
+        "The user's locale is pt-PT — answer in European Portuguese."
+        ' Format money as e.g. "12,50 €".'
+    ),
+    "en": (
+        "The user's locale is en — answer in English."
+        ' Format money as e.g. "€12.50".'
+    ),
+}
+
+
 SYSTEM_PROMPT_TEMPLATE = """You are the assistant of a personal expense tracker.
-Today is {today} (UTC). The user's locale is pt-PT — answer in European Portuguese.
-Format money as e.g. "12,50 €". Be concise.
+Today is {today} (UTC). {locale_instruction} Be concise.
 
 Available expense categories (use these exact ids):
 {categories}
@@ -62,12 +73,14 @@ Rules:
 """
 
 
-def _build_system_prompt(categories: list[Category]) -> str:
+def _build_system_prompt(categories: list[Category], language: str) -> str:
     categories_text = "\n".join(
         f"  - {c.slug} (id: {c.id}): {c.name} {c.icon or ''}" for c in categories
     )
+    locale_instruction = LOCALE_INSTRUCTION.get(language, LOCALE_INSTRUCTION["en"])
     return SYSTEM_PROMPT_TEMPLATE.format(
         today=datetime.now(UTC).date().isoformat(),
+        locale_instruction=locale_instruction,
         categories=categories_text,
     )
 
@@ -106,13 +119,18 @@ async def _run_tool(
     return result, client_action
 
 
-async def stream_chat(session: Session, user_id: UUID, request: ChatRequest) -> AsyncIterator[str]:
+async def stream_chat(
+    session: Session,
+    user_id: UUID,
+    request: ChatRequest,
+    language: str = "en",
+) -> AsyncIterator[str]:
     settings = get_settings()
     client = get_llm_client()
 
     categories = fetch_categories(session)
     messages: list[dict[str, Any]] = [
-        {"role": "system", "content": _build_system_prompt(categories)},
+        {"role": "system", "content": _build_system_prompt(categories, language)},
         *[{"role": m.role.value, "content": m.content} for m in request.messages],
     ]
     tools_schema = [t.to_openai_schema() for t in REGISTRY.values()]

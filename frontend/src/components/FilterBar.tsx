@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import type { Category } from "@/types/api";
 
 export interface FilterValues {
@@ -20,6 +22,8 @@ interface Props {
 }
 
 export function FilterBar({ categories, value, onChange, onReset }: Props) {
+  const t = useTranslations("filters");
+
   function set<K extends keyof FilterValues>(key: K, v: FilterValues[K]) {
     onChange({ ...value, [key]: v });
   }
@@ -28,17 +32,17 @@ export function FilterBar({ categories, value, onChange, onReset }: Props) {
     <div className="bg-paper-card border border-paper-line rounded p-4 shadow-card">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xs uppercase tracking-[0.12em] text-ink-muted font-medium">
-          Filters
+          {t("title")}
         </h2>
         <button onClick={onReset} className="btn-ghost text-xs">
-          Reset
+          {t("reset")}
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div>
           <label htmlFor="f-cat" className="label">
-            Category
+            {t("category")}
           </label>
           <select
             id="f-cat"
@@ -46,7 +50,7 @@ export function FilterBar({ categories, value, onChange, onReset }: Props) {
             value={value.categoryId}
             onChange={(e) => set("categoryId", e.target.value)}
           >
-            <option value="">All categories</option>
+            <option value="">{t("allCategories")}</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.icon ? `${c.icon}  ` : ""}
@@ -58,7 +62,7 @@ export function FilterBar({ categories, value, onChange, onReset }: Props) {
 
         <div>
           <label htmlFor="f-mode" className="label">
-            Date filter
+            {t("dateFilter")}
           </label>
           <select
             id="f-mode"
@@ -74,15 +78,15 @@ export function FilterBar({ categories, value, onChange, onReset }: Props) {
               })
             }
           >
-            <option value="month">By month</option>
-            <option value="range">By date range</option>
+            <option value="month">{t("byMonth")}</option>
+            <option value="range">{t("byDateRange")}</option>
           </select>
         </div>
 
         {value.dateMode === "month" ? (
           <div className="lg:col-span-2">
             <label htmlFor="f-month" className="label">
-              Month
+              {t("month")}
             </label>
             <input
               id="f-month"
@@ -96,7 +100,7 @@ export function FilterBar({ categories, value, onChange, onReset }: Props) {
           <>
             <div>
               <label htmlFor="f-from" className="label">
-                From
+                {t("from")}
               </label>
               <input
                 id="f-from"
@@ -108,7 +112,7 @@ export function FilterBar({ categories, value, onChange, onReset }: Props) {
             </div>
             <div>
               <label htmlFor="f-to" className="label">
-                To
+                {t("to")}
               </label>
               <input
                 id="f-to"
@@ -123,13 +127,13 @@ export function FilterBar({ categories, value, onChange, onReset }: Props) {
 
         <div className="md:col-span-2 lg:col-span-4">
           <label htmlFor="f-q" className="label">
-            Search description
+            {t("searchDescription")}
           </label>
           <input
             id="f-q"
             type="text"
             className="field"
-            placeholder="Type to filter…"
+            placeholder={t("searchPlaceholder")}
             value={value.q}
             onChange={(e) => set("q", e.target.value)}
           />

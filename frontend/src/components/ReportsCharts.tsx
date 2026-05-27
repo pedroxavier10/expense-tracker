@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   Bar,
   BarChart,
@@ -12,7 +13,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { formatCurrency } from "@/lib/format";
+import { useFormat } from "@/lib/useFormat";
 
 const PALETTE = [
   "#1a1a1a",
@@ -42,17 +43,19 @@ interface Props {
 }
 
 export function ReportsCharts({ monthlyData, categoryData, loading }: Props) {
+  const t = useTranslations("reports");
+  const { formatCurrency } = useFormat();
   if (loading) {
-    return <p className="text-sm text-ink-muted">Loading charts…</p>;
+    return <p className="text-sm text-ink-muted">{t("loadingCharts")}</p>;
   }
 
   return (
     <div className="space-y-6">
       {/* Bar chart — spending by month */}
       <div className="bg-paper-card border border-paper-line rounded p-6 shadow-card">
-        <h2 className="font-display text-xl text-ink mb-4">Spending by month</h2>
+        <h2 className="font-display text-xl text-ink mb-4">{t("spendingByMonth")}</h2>
         {monthlyData.every((d) => d.total === 0) ? (
-          <p className="text-sm text-ink-muted">No data for the last 6 months.</p>
+          <p className="text-sm text-ink-muted">{t("noDataLast6Months")}</p>
         ) : (
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={monthlyData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
@@ -70,7 +73,7 @@ export function ReportsCharts({ monthlyData, categoryData, loading }: Props) {
                 tickLine={false}
               />
               <Tooltip
-                formatter={(v) => [formatCurrency(v as number), "Total"]}
+                formatter={(v) => [formatCurrency(v as number), t("total")]}
                 cursor={{ fill: "rgba(0,0,0,0.04)" }}
                 contentStyle={{
                   background: "#f5f0e8",
@@ -87,9 +90,9 @@ export function ReportsCharts({ monthlyData, categoryData, loading }: Props) {
 
       {/* Donut chart — by category */}
       <div className="bg-paper-card border border-paper-line rounded p-6 shadow-card">
-        <h2 className="font-display text-xl text-ink mb-4">By category (this month)</h2>
+        <h2 className="font-display text-xl text-ink mb-4">{t("byCategoryThisMonth")}</h2>
         {categoryData.length === 0 ? (
-          <p className="text-sm text-ink-muted">No expenses this month.</p>
+          <p className="text-sm text-ink-muted">{t("noExpensesThisMonth")}</p>
         ) : (
           <ResponsiveContainer width="100%" height={260}>
             <PieChart>

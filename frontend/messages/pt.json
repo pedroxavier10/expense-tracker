@@ -1,0 +1,117 @@
+{
+  "common": {
+    "loading": "A carregar…",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Apagar",
+    "close": "Fechar",
+    "save": "Guardar",
+    "saving": "A guardar…",
+    "no": "Não",
+    "sure": "De certeza?"
+  },
+  "brand": {
+    "name": "Ledger-x",
+    "tagline": "Um lugar tranquilo para registar o que gastas.",
+    "loginTagline": "Um lugar tranquilo para as tuas despesas."
+  },
+  "sidebar": {
+    "dashboard": "Painel",
+    "expenses": "Despesas",
+    "categories": "Categorias",
+    "reports": "Relatórios",
+    "chat": "Chat",
+    "signOut": "Terminar sessão",
+    "collapse": "Recolher",
+    "expandSidebar": "Expandir barra lateral",
+    "collapseSidebar": "Recolher barra lateral",
+    "language": "Língua"
+  },
+  "login": {
+    "email": "Email",
+    "password": "Palavra-passe",
+    "signIn": "Entrar",
+    "signingIn": "A entrar…",
+    "loginFailed": "Falha ao iniciar sessão"
+  },
+  "dashboard": {
+    "title": "Painel",
+    "spentThisMonth": "Gasto este mês",
+    "topCategory": "Categoria principal",
+    "recent": "Recentes",
+    "viewAll": "Ver todas →",
+    "addExpense": "Adicionar despesa",
+    "noExpensesThisMonth": "Sem despesas este mês.",
+    "addOne": "Adicionar uma",
+    "expenseCount": "{count, plural, one {# despesa} other {# despesas}}"
+  },
+  "expenses": {
+    "title": "Despesas",
+    "subtitle": "Consulta e gere os teus registos de gastos.",
+    "addExpense": "Adicionar despesa",
+    "addExpenseAction": "Adicionar",
+    "update": "Atualizar",
+    "noMatchingExpenses": "Nenhuma despesa corresponde a estes filtros.",
+    "shown": "(mostradas)",
+    "expenseCount": "{count, plural, one {# despesa} other {# despesas}}"
+  },
+  "forms": {
+    "amount": "Valor",
+    "date": "Data",
+    "category": "Categoria",
+    "description": "Descrição",
+    "descriptionPlaceholder": "ex. Almoço no café da esquina",
+    "saveFailed": "Falha ao guardar"
+  },
+  "filters": {
+    "title": "Filtros",
+    "reset": "Limpar",
+    "category": "Categoria",
+    "allCategories": "Todas as categorias",
+    "dateFilter": "Filtro de data",
+    "byMonth": "Por mês",
+    "byDateRange": "Por intervalo",
+    "month": "Mês",
+    "from": "De",
+    "to": "Até",
+    "searchDescription": "Pesquisar descrição",
+    "searchPlaceholder": "Escreve para filtrar…"
+  },
+  "categories": {
+    "title": "Categorias",
+    "subtitle": "Categorias de despesas disponíveis.",
+    "noCategoriesFound": "Sem categorias."
+  },
+  "reports": {
+    "title": "Relatórios",
+    "subtitle": "Tendências de gasto e repartição.",
+    "loadingCharts": "A carregar gráficos…",
+    "spendingByMonth": "Gasto por mês",
+    "noDataLast6Months": "Sem dados nos últimos 6 meses.",
+    "byCategoryThisMonth": "Por categoria (este mês)",
+    "noExpensesThisMonth": "Sem despesas este mês.",
+    "total": "Total"
+  },
+  "chat": {
+    "title": "Assistente",
+    "pageSubtitle": "Conversa com o assistente para registar despesas e consultar resumos.",
+    "fabTitle": "Assistente",
+    "fabSubtitle": "Pergunta sobre despesas, registos e resumos.",
+    "greeting": "Olá! Posso ajudar a registar despesas, consultar gastos passados ou ver onde gastas mais. Em que te posso ajudar?",
+    "usingTool": "a usar {tool}…",
+    "placeholder": "Escreve uma mensagem…",
+    "send": "Enviar",
+    "sending": "…",
+    "openChat": "Abrir chat",
+    "closeChat": "Fechar chat",
+    "chatFailed": "Falha no chat",
+    "tools": {
+      "list_categories": "categorias",
+      "search_expenses": "pesquisa de despesas",
+      "monthly_summary": "resumo mensal",
+      "top_categories": "categorias com maior gasto",
+      "add_expense": "adicionar despesa",
+      "open_add_expense_form": "formulário de despesa"
+    }
+  }
+}

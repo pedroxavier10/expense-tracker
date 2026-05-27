@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 import type { Category } from "@/types/api";
 
 interface Props {
@@ -5,8 +9,9 @@ interface Props {
 }
 
 export function CategoryList({ categories }: Props) {
+  const t = useTranslations("categories");
   if (categories.length === 0) {
-    return <p className="text-sm text-ink-muted">No categories found.</p>;
+    return <p className="text-sm text-ink-muted">{t("noCategoriesFound")}</p>;
   }
 
   return (

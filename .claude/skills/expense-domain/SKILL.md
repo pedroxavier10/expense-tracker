@@ -72,6 +72,16 @@ See `docs/LLM_INTEGRATION.md` for the full pattern. Short version:
 - Tests: arrange-act-assert, one behaviour per test, use the in-memory
   SQLite fixtures.
 
+## User preferences
+
+`User.language` (Literal `"en" | "pt"`, default `"en"`) is updated via
+`PATCH /api/v1/auth/me` with a `UserUpdate` schema. The schema is
+intentionally partial so future preferences (theme, notifications, …) can
+be added without breaking the contract. `chat_service._build_system_prompt`
+takes the language as an argument and substitutes a locale instruction
+(`LOCALE_INSTRUCTION[lang]`) into the prompt template — so the chat bot
+answers in the user's chosen language without any extra round-trip.
+
 ## Running locally after changes
 
 ```bash

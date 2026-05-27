@@ -7,12 +7,14 @@
  * docked above the button. ESC closes it.
  */
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import { ChatPanel } from "@/components/ChatPanel";
 
 export function ChatFAB() {
   const [open, setOpen] = useState(false);
+  const t = useTranslations("chat");
 
   useEffect(() => {
     if (!open) return;
@@ -34,16 +36,14 @@ export function ChatFAB() {
           <div className="flex items-center justify-between border-b border-paper-line px-4 py-3">
             <div>
               <h2 className="font-display text-lg text-ink leading-tight">
-                Assistente
+                {t("fabTitle")}
               </h2>
-              <p className="text-xs text-ink-muted">
-                Pergunta sobre despesas, registos e resumos.
-              </p>
+              <p className="text-xs text-ink-muted">{t("fabSubtitle")}</p>
             </div>
             <button
               onClick={() => setOpen(false)}
               className="btn-ghost"
-              aria-label="Fechar chat"
+              aria-label={t("closeChat")}
             >
               <svg
                 width="16"
@@ -64,8 +64,8 @@ export function ChatFAB() {
 
       <button
         onClick={() => setOpen((v) => !v)}
-        title={open ? "Fechar chat" : "Abrir chat"}
-        aria-label={open ? "Fechar chat" : "Abrir chat"}
+        title={open ? t("closeChat") : t("openChat")}
+        aria-label={open ? t("closeChat") : t("openChat")}
         className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-ink text-paper shadow-card hover:bg-ink-soft transition-colors flex items-center justify-center"
       >
         {open ? (

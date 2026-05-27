@@ -1,0 +1,117 @@
+{
+  "common": {
+    "loading": "Loading…",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "close": "Close",
+    "save": "Save",
+    "saving": "Saving…",
+    "no": "No",
+    "sure": "Sure?"
+  },
+  "brand": {
+    "name": "Ledger-x",
+    "tagline": "A quiet place to record what you spend.",
+    "loginTagline": "A quiet place for your expenses."
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "expenses": "Expenses",
+    "categories": "Categories",
+    "reports": "Reports",
+    "chat": "Chat",
+    "signOut": "Sign out",
+    "collapse": "Collapse",
+    "expandSidebar": "Expand sidebar",
+    "collapseSidebar": "Collapse sidebar",
+    "language": "Language"
+  },
+  "login": {
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "loginFailed": "Login failed"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "spentThisMonth": "Spent this month",
+    "topCategory": "Top category",
+    "recent": "Recent",
+    "viewAll": "View all →",
+    "addExpense": "Add Expense",
+    "noExpensesThisMonth": "No expenses this month.",
+    "addOne": "Add one",
+    "expenseCount": "{count, plural, one {# expense} other {# expenses}}"
+  },
+  "expenses": {
+    "title": "Expenses",
+    "subtitle": "Browse and manage your spending records.",
+    "addExpense": "Add Expense",
+    "addExpenseAction": "Add expense",
+    "update": "Update",
+    "noMatchingExpenses": "No expenses match these filters.",
+    "shown": "(shown)",
+    "expenseCount": "{count, plural, one {# expense} other {# expenses}}"
+  },
+  "forms": {
+    "amount": "Amount",
+    "date": "Date",
+    "category": "Category",
+    "description": "Description",
+    "descriptionPlaceholder": "e.g. Lunch at the corner café",
+    "saveFailed": "Save failed"
+  },
+  "filters": {
+    "title": "Filters",
+    "reset": "Reset",
+    "category": "Category",
+    "allCategories": "All categories",
+    "dateFilter": "Date filter",
+    "byMonth": "By month",
+    "byDateRange": "By date range",
+    "month": "Month",
+    "from": "From",
+    "to": "To",
+    "searchDescription": "Search description",
+    "searchPlaceholder": "Type to filter…"
+  },
+  "categories": {
+    "title": "Categories",
+    "subtitle": "Available spending categories.",
+    "noCategoriesFound": "No categories found."
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "Spending trends and breakdown.",
+    "loadingCharts": "Loading charts…",
+    "spendingByMonth": "Spending by month",
+    "noDataLast6Months": "No data for the last 6 months.",
+    "byCategoryThisMonth": "By category (this month)",
+    "noExpensesThisMonth": "No expenses this month.",
+    "total": "Total"
+  },
+  "chat": {
+    "title": "Assistant",
+    "pageSubtitle": "Chat with the assistant to log expenses and check summaries.",
+    "fabTitle": "Assistant",
+    "fabSubtitle": "Ask about expenses, records and summaries.",
+    "greeting": "Hi! I can help you log expenses, look up past spending, or see where you spend the most. How can I help?",
+    "usingTool": "using {tool}…",
+    "placeholder": "Write a message…",
+    "send": "Send",
+    "sending": "…",
+    "openChat": "Open chat",
+    "closeChat": "Close chat",
+    "chatFailed": "Chat failed",
+    "tools": {
+      "list_categories": "categories",
+      "search_expenses": "expense search",
+      "monthly_summary": "monthly summary",
+      "top_categories": "top categories",
+      "add_expense": "add expense",
+      "open_add_expense_form": "expense form"
+    }
+  }
+}

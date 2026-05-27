@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { AuthProvider, useAuth } from "@/components/AuthProvider";
 import { AppShell } from "@/components/AppShell";
@@ -8,6 +9,7 @@ import { AppShell } from "@/components/AppShell";
 function AppGuard({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const tCommon = useTranslations("common");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -18,7 +20,7 @@ function AppGuard({ children }: { children: React.ReactNode }) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-ink-muted text-sm">Loading…</p>
+        <p className="text-ink-muted text-sm">{tCommon("loading")}</p>
       </div>
     );
   }

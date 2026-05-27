@@ -19,6 +19,7 @@ import type {
   ExpenseUpdatePayload,
   Token,
   User,
+  UserUpdatePayload,
 } from "@/types/api";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
@@ -105,6 +106,13 @@ export async function login(email: string, password: string): Promise<Token> {
 
 export async function getMe(): Promise<User> {
   return request<User>("/auth/me");
+}
+
+export async function updateMe(payload: UserUpdatePayload): Promise<User> {
+  return request<User>("/auth/me", {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
 }
 
 export function logout(): void {

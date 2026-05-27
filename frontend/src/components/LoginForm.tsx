@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { useAuth } from "@/components/AuthProvider";
@@ -8,6 +9,8 @@ import { useAuth } from "@/components/AuthProvider";
 export function LoginForm() {
   const { login, user, loading } = useAuth();
   const router = useRouter();
+  const tLogin = useTranslations("login");
+  const tBrand = useTranslations("brand");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +28,7 @@ export function LoginForm() {
       await login(email, password);
       router.push("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      setError(err instanceof Error ? err.message : tLogin("loginFailed"));
     } finally {
       setBusy(false);
     }
@@ -35,16 +38,16 @@ export function LoginForm() {
     <div className="min-h-screen flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
         <div className="mb-12 text-center">
-          <h1 className="font-display text-5xl italic text-ink mb-2">Ledger-x</h1>
-          <p className="text-ink-muted text-sm">
-            A quiet place for your expenses.
-          </p>
+          <h1 className="font-display text-5xl italic text-ink mb-2">
+            {tBrand("name")}
+          </h1>
+          <p className="text-ink-muted text-sm">{tBrand("loginTagline")}</p>
         </div>
 
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
             <label htmlFor="email" className="label">
-              Email
+              {tLogin("email")}
             </label>
             <input
               id="email"
@@ -59,7 +62,7 @@ export function LoginForm() {
 
           <div>
             <label htmlFor="password" className="label">
-              Password
+              {tLogin("password")}
             </label>
             <input
               id="password"
@@ -79,7 +82,7 @@ export function LoginForm() {
           )}
 
           <button type="submit" disabled={busy} className="btn-primary w-full">
-            {busy ? "Signing in…" : "Sign in"}
+            {busy ? tLogin("signingIn") : tLogin("signIn")}
           </button>
         </form>
       </div>

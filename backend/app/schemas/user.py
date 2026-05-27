@@ -5,9 +5,12 @@ independently from the database shape.
 """
 
 from datetime import datetime
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
+Language = Literal["en", "pt"]
 
 
 class UserCreate(BaseModel):
@@ -25,7 +28,14 @@ class UserRead(BaseModel):
     id: UUID
     email: EmailStr
     is_active: bool
+    language: Language
     created_at: datetime
+
+
+class UserUpdate(BaseModel):
+    """Partial update of user preferences. All fields optional."""
+
+    language: Language | None = None
 
 
 class Token(BaseModel):
