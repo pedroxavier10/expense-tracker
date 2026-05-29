@@ -21,7 +21,8 @@ from app.services import category_service
 class OpenAddExpenseFormInput(BaseModel):
     """All fields optional — the model fills in whatever it inferred."""
 
-    amount: Decimal | None = Field(default=None, gt=0, description="Expense amount.")
+    # float avoids Decimal's lookahead-regex JSON Schema rejected by ECMA-262 validators (e.g. Groq)
+    amount: float | None = Field(default=None, gt=0, description="Expense amount.")
     expense_date: date | None = Field(default=None, description="Date of the expense.")
     description: str | None = Field(default=None, max_length=500)
     category_slug: str | None = Field(
@@ -40,7 +41,7 @@ def open_add_expense_form(
             category_id = str(cat.id)
 
     prefill = {
-        "amount": str(payload.amount) if payload.amount is not None else None,
+        "amount": str(Decimal(str(payload.amount))) if payload.amount is not None else None,
         "expense_date": payload.expense_date.isoformat() if payload.expense_date else None,
         "description": payload.description,
         "category_id": category_id,
