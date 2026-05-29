@@ -10,7 +10,7 @@ from datetime import UTC, date, datetime
 from decimal import Decimal
 from uuid import UUID
 
-from sqlalchemy import func
+from sqlalchemy import extract, func
 from sqlmodel import Session, col, select
 
 from app.models.category import Category
@@ -128,6 +128,7 @@ def get_monthly_summary(session: Session, user_id: UUID, month: str) -> dict:
             Category.id,
             Category.slug,
             Category.name,
+            Category.icon,
             func.coalesce(func.sum(Expense.amount), 0).label("total"),
             func.count(Expense.id).label("count"),
         )
@@ -137,7 +138,7 @@ def get_monthly_summary(session: Session, user_id: UUID, month: str) -> dict:
             Expense.expense_date >= start,
             Expense.expense_date <= end,
         )
-        .group_by(Category.id, Category.slug, Category.name)
+        .group_by(Category.id, Category.slug, Category.name, Category.icon)
         .order_by(func.sum(Expense.amount).desc())
     ).all()
 
@@ -146,10 +147,11 @@ def get_monthly_summary(session: Session, user_id: UUID, month: str) -> dict:
             "category_id": str(cid),
             "slug": slug,
             "name": name,
+            "icon": icon,
             "total": str(total),
             "count": int(count),
         }
-        for cid, slug, name, total, count in rows
+        for cid, slug, name, icon, total, count in rows
     ]
     grand_total = sum((Decimal(c["total"]) for c in by_category), Decimal("0"))
     grand_count = sum(c["count"] for c in by_category)
@@ -157,6 +159,76 @@ def get_monthly_summary(session: Session, user_id: UUID, month: str) -> dict:
         "month": month,
         "total": str(grand_total),
         "count": grand_count,
+        "by_category": by_category,
+    }
+
+
+def get_annual_summary(session: Session, user_id: UUID, year: int) -> dict:
+    """Return monthly totals + category breakdown for a full calendar year.
+
+    Two DB queries: one GROUP BY month for the bar chart, one GROUP BY category
+    for the pie chart. Never fetches individual expense rows.
+    """
+    start = date(year, 1, 1)
+    end = date(year, 12, 31)
+
+    # Monthly totals — GROUP BY month number (max 12 rows returned)
+    monthly_rows = session.exec(
+        select(
+            extract("month", Expense.expense_date).label("month_num"),
+            func.coalesce(func.sum(Expense.amount), 0).label("total"),
+        )
+        .where(
+            Expense.user_id == user_id,
+            Expense.expense_date >= start,
+            Expense.expense_date <= end,
+        )
+        .group_by(extract("month", Expense.expense_date))
+    ).all()
+
+    by_month_map = {int(float(month_num)): Decimal(str(total)) for month_num, total in monthly_rows}
+    by_month = [
+        {"month": f"{year}-{m:02d}", "total": str(by_month_map.get(m, Decimal("0")))}
+        for m in range(1, 13)
+    ]
+
+    # Category totals for the full year
+    cat_rows = session.exec(
+        select(
+            Category.id,
+            Category.slug,
+            Category.name,
+            Category.icon,
+            func.coalesce(func.sum(Expense.amount), 0).label("total"),
+            func.count(Expense.id).label("count"),
+        )
+        .join(Category, Category.id == Expense.category_id)
+        .where(
+            Expense.user_id == user_id,
+            Expense.expense_date >= start,
+            Expense.expense_date <= end,
+        )
+        .group_by(Category.id, Category.slug, Category.name, Category.icon)
+        .order_by(func.sum(Expense.amount).desc())
+    ).all()
+
+    by_category = [
+        {
+            "category_id": str(cid),
+            "slug": slug,
+            "name": name,
+            "icon": icon,
+            "total": str(total),
+            "count": int(count),
+        }
+        for cid, slug, name, icon, total, count in cat_rows
+    ]
+    grand_total = sum((Decimal(c["total"]) for c in by_category), Decimal("0"))
+
+    return {
+        "year": year,
+        "total": str(grand_total),
+        "by_month": by_month,
         "by_category": by_category,
     }
 

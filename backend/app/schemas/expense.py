@@ -86,3 +86,34 @@ class ExpenseListResponse(BaseModel):
     total: int
     limit: int
     offset: int
+
+
+# ---------- Aggregate / summary schemas ----------
+
+
+class CategorySummary(BaseModel):
+    category_id: str
+    slug: str
+    name: str
+    icon: str | None
+    total: Decimal
+    count: int
+
+
+class MonthlySummaryResponse(BaseModel):
+    month: str  # YYYY-MM
+    total: Decimal
+    count: int
+    by_category: list[CategorySummary]
+
+
+class MonthlyTotal(BaseModel):
+    month: str  # YYYY-MM
+    total: Decimal
+
+
+class AnnualSummaryResponse(BaseModel):
+    year: int
+    total: Decimal
+    by_month: list[MonthlyTotal]
+    by_category: list[CategorySummary]
