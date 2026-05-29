@@ -72,6 +72,7 @@ endpoints (api/v1/endpoints/)  →  services (services/)  →  models (models/)
 - **`core/`** — Settings (`config.py`) and JWT/bcrypt security
 - **`db/`** — Engine, session factory, seed data
 - **`llm/`** — Tool registry + OpenAI/Anthropic format converters (ready for chatbot)
+- **`scheduler.py`** — APScheduler background job; materializes all active recurring expense rules on day 1 of each month at 02:00 UTC
 
 Key FastAPI dependencies injected everywhere:
 - `SessionDep` — yields a SQLModel `Session`
@@ -81,8 +82,16 @@ Key FastAPI dependencies injected everywhere:
 
 - **`lib/api.ts`** — Single fetch wrapper; injects Bearer token from `localStorage`; throws `ApiError` on failure
 - **`types/api.ts`** — Hand-written TypeScript mirrors of backend Pydantic schemas; keep in sync manually
-- **`components/`** — `AuthProvider` (context), `LocaleProvider` (i18n state), `Dashboard` (main coordinator), `ExpenseForm`, `ExpenseList`, `FilterBar`, `LoginForm`
-- **`app/`** — Next.js App Router; `layout.tsx` sets fonts and mounts `LocaleProvider`; `page.tsx` wraps Dashboard in AuthProvider
+- **`hooks/`** — Data-fetching hooks (`useExpenses`, `useRecurringExpenses`, `useCategories`, …)
+- **`components/auth/`** — `AuthProvider` (context), `LoginForm`
+- **`components/layout/`** — `AppShell`, `Sidebar`
+- **`components/expenses/`** — `ExpenseForm`, `ExpenseList`, `FilterBar`, `AddExpenseModal`
+- **`components/recurring/`** — `RecurringExpenseList`, `RecurringExpenseForm`, `AddRecurringExpenseModal`, `MaterializeConfirmStep`
+- **`components/chat/`** — `ChatPanel`, `ChatFAB`, `ChatActionsProvider`
+- **`components/categories/`** — `CategoryList`
+- **`components/reports/`** — `ReportsCharts`, `SummaryCard`
+- **`app/(auth)/`** — Login route (unauthenticated layout)
+- **`app/(app)/`** — Authenticated route group: `dashboard/`, `expenses/`, `recurring/`, `categories/`, `reports/`, `chat/`
 - **`messages/`** — `en.json` / `pt.json` translation namespaces consumed by `next-intl`
 
 ### API endpoints
@@ -95,6 +104,12 @@ POST   /api/v1/expenses
 PATCH  /api/v1/expenses/{id}
 DELETE /api/v1/expenses/{id}
 GET    /api/v1/categories
+GET    /api/v1/recurring-expenses
+POST   /api/v1/recurring-expenses
+GET    /api/v1/recurring-expenses/{rule_id}
+PATCH  /api/v1/recurring-expenses/{rule_id}
+DELETE /api/v1/recurring-expenses/{rule_id}
+POST   /api/v1/recurring-expenses/{rule_id}/materialize-current-month  # creates the expense for the current month; 409 if already exists or rule inactive
 ```
 
 ## Key Conventions
