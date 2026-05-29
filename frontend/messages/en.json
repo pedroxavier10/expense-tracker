@@ -18,6 +18,7 @@
   "sidebar": {
     "dashboard": "Dashboard",
     "expenses": "Expenses",
+    "recurring": "Recurring",
     "categories": "Categories",
     "reports": "Reports",
     "chat": "Chat",
@@ -53,7 +54,31 @@
     "update": "Update",
     "noMatchingExpenses": "No expenses match these filters.",
     "shown": "(shown)",
-    "expenseCount": "{count, plural, one {# expense} other {# expenses}}"
+    "expenseCount": "{count, plural, one {# expense} other {# expenses}}",
+    "recurringBadge": "Recurring"
+  },
+  "recurring": {
+    "title": "Recurring Expenses",
+    "subtitle": "Rules that automatically create expenses each month.",
+    "addRule": "Add Rule",
+    "addRuleAction": "Add rule",
+    "update": "Update",
+    "noRules": "No recurring expense rules yet.",
+    "dayOfMonth": "Day of month",
+    "dayOfMonthHelp": "If the month has fewer days, the last day will be used.",
+    "endDate": "End date",
+    "endDateOptional": "Optional — leave blank for indefinite",
+    "active": "Active",
+    "paused": "Paused",
+    "pauseRule": "Pause",
+    "resumeRule": "Resume",
+    "everyDay": "Day {day} of each month",
+    "confirmMaterializeTitle": "Create expense for this month?",
+    "confirmMaterializeBody": "Do you want to create the expense for {month} now?",
+    "confirmYes": "Yes, create it",
+    "confirmNo": "Skip for now",
+    "materializeSuccess": "Expense for {month} created successfully.",
+    "saveFailed": "Save failed"
   },
   "forms": {
     "amount": "Amount",

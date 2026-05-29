@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
-import { ExpenseForm, type ExpenseFormInitialValues } from "@/components/ExpenseForm";
+import { ExpenseForm, type ExpenseFormInitialValues } from "@/components/expenses/ExpenseForm";
 import type { Category, ExpenseCreatePayload, ExpenseUpdatePayload } from "@/types/api";
 
 interface Props {

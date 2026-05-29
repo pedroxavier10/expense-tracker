@@ -10,6 +10,7 @@ from collections.abc import Generator
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import event
 from sqlalchemy.pool import StaticPool
 from sqlmodel import Session, SQLModel, create_engine
 
@@ -27,6 +28,12 @@ def session_fixture() -> Generator[Session, None, None]:
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
+
+    # Enable FK enforcement in SQLite so ON DELETE SET NULL works in tests.
+    @event.listens_for(engine, "connect")
+    def set_sqlite_pragma(conn, _):
+        conn.execute("PRAGMA foreign_keys=ON")
+
     SQLModel.metadata.create_all(engine)
     with Session(engine) as session:
         seed_categories(session)

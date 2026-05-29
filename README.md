@@ -236,22 +236,6 @@ All `/expenses` and `/categories` endpoints require `Authorization: Bearer <toke
 | `limit`                | 1–500, default 100                                   |
 | `offset`               | for pagination                                       |
 
-## How this evolves
-
-The architecture was chosen so the two obvious next steps don't require
-rewrites:
-
-- **Mobile app** — see [`docs/MOBILE_EVOLUTION.md`](docs/MOBILE_EVOLUTION.md).
-  The TypeScript types and most of the API client are directly portable to
-  React Native (Expo). The backend is already API-first; only refresh tokens
-  and optional push-notification endpoints need adding.
-
-- **LLM / chatbot** — see [`docs/LLM_INTEGRATION.md`](docs/LLM_INTEGRATION.md).
-  The `app/llm/` module already exposes a `Tool` registry with OpenAI and
-  Anthropic schema converters, plus two ready handlers (`search_expenses`,
-  `add_expense`) that call straight into the service layer. Wiring an actual
-  chat endpoint is purely additive — no existing code needs to change.
-
 ## Personal-use deliberate omissions
 
 These are intentionally **not** in the project, because they'd be

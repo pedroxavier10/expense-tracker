@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
-import { AddExpenseModal } from "@/components/AddExpenseModal";
-import { SummaryCard } from "@/components/SummaryCard";
+import { AddExpenseModal } from "@/components/expenses/AddExpenseModal";
+import { SummaryCard } from "@/components/reports/SummaryCard";
 import { useLocale } from "@/components/LocaleProvider";
 import { useCategories } from "@/hooks/useCategories";
 import { useExpenses } from "@/hooks/useExpenses";

@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
-import { ChatPanel } from "@/components/ChatPanel";
+import { ChatPanel } from "@/components/chat/ChatPanel";
 
 export default function ChatPage() {
   const t = useTranslations("chat");

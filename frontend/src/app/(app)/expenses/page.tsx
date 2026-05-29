@@ -2,9 +2,9 @@
 
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
-import { AddExpenseModal } from "@/components/AddExpenseModal";
-import { ExpenseList } from "@/components/ExpenseList";
-import { FilterBar, type FilterValues } from "@/components/FilterBar";
+import { AddExpenseModal } from "@/components/expenses/AddExpenseModal";
+import { ExpenseList } from "@/components/expenses/ExpenseList";
+import { FilterBar, type FilterValues } from "@/components/expenses/FilterBar";
 import { useCategories } from "@/hooks/useCategories";
 import { useExpenses } from "@/hooks/useExpenses";
 import * as api from "@/lib/api";

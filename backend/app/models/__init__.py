@@ -6,6 +6,7 @@ metadata, which Alembic needs for autogenerate to work.
 
 from app.models.category import Category
 from app.models.expense import Expense
+from app.models.recurring_expense import RecurringExpense
 from app.models.user import User
 
-__all__ = ["Category", "Expense", "User"]
+__all__ = ["Category", "Expense", "RecurringExpense", "User"]

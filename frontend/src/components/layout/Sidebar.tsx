@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { useLocale } from "@/components/LocaleProvider";
 import { SUPPORTED_LOCALES, type Locale } from "@/lib/i18n";
 
@@ -27,6 +27,16 @@ const NAV_ITEMS = [
     icon: (
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 4h12M3 8h8M3 12h10" />
+      </svg>
+    ),
+  },
+  {
+    href: "/recurring",
+    key: "recurring" as const,
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 9a5 5 0 1 1 1.5 3.5" />
+        <path d="M4 13V9h4" />
       </svg>
     ),
   },

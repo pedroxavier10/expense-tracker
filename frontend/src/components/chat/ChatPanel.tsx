@@ -20,10 +20,10 @@ import {
   type FormEvent,
 } from "react";
 
-import { useChatActions, EXPENSE_CREATED_EVENT } from "@/components/ChatActionsProvider";
+import { useChatActions, EXPENSE_CREATED_EVENT } from "@/components/chat/ChatActionsProvider";
 import * as api from "@/lib/api";
 import type { ChatMessage, ChatStreamEvent } from "@/types/api";
-import type { ExpenseFormInitialValues } from "@/components/ExpenseForm";
+import type { ExpenseFormInitialValues } from "@/components/expenses/ExpenseForm";
 
 interface Props {
   variant: "page" | "dialog";
@@ -224,4 +224,3 @@ function humanizeTool(
   if (TOOL_KEYS.has(name)) return t(`tools.${name}` as never);
   return name;
 }
-

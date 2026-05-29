@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
-import { ReportsCharts } from "@/components/ReportsCharts";
+import { ReportsCharts } from "@/components/reports/ReportsCharts";
 import { useLocale } from "@/components/LocaleProvider";
 import * as api from "@/lib/api";
 import { toIntlLocale } from "@/lib/i18n";

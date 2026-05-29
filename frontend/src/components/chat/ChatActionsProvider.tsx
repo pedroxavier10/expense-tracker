@@ -17,8 +17,8 @@ import {
   type ReactNode,
 } from "react";
 
-import { AddExpenseModal } from "@/components/AddExpenseModal";
-import type { ExpenseFormInitialValues } from "@/components/ExpenseForm";
+import { AddExpenseModal } from "@/components/expenses/AddExpenseModal";
+import type { ExpenseFormInitialValues } from "@/components/expenses/ExpenseForm";
 import { useCategories } from "@/hooks/useCategories";
 import * as api from "@/lib/api";
 import type { ExpenseCreatePayload, ExpenseUpdatePayload } from "@/types/api";

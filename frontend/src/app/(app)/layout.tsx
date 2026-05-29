@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
-import { AuthProvider, useAuth } from "@/components/AuthProvider";
-import { AppShell } from "@/components/AppShell";
+import { AuthProvider, useAuth } from "@/components/auth/AuthProvider";
+import { AppShell } from "@/components/layout/AppShell";
 
 function AppGuard({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
