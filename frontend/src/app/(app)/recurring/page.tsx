@@ -2,8 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
-import { AddRecurringExpenseModal } from "@/components/AddRecurringExpenseModal";
-import { RecurringExpenseList } from "@/components/RecurringExpenseList";
+import { AddRecurringExpenseModal } from "@/components/recurring/AddRecurringExpenseModal";
+import { RecurringExpenseList } from "@/components/recurring/RecurringExpenseList";
 import { useCategories } from "@/hooks/useCategories";
 import { useRecurringExpenses } from "@/hooks/useRecurringExpenses";
 import * as api from "@/lib/api";

@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
-import { CategoryList } from "@/components/CategoryList";
+import { CategoryList } from "@/components/categories/CategoryList";
 import { useCategories } from "@/hooks/useCategories";
 
 export default function CategoriesPage() {

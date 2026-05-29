@@ -2,7 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { RecurringExpenseForm } from "@/components/RecurringExpenseForm";
+import { RecurringExpenseForm } from "@/components/recurring/RecurringExpenseForm";
+import { MaterializeConfirmStep } from "@/components/recurring/MaterializeConfirmStep";
 import * as api from "@/lib/api";
 import type {
   Category,
@@ -89,26 +90,12 @@ export function AddRecurringExpenseModal({ categories, onCreated, onClose }: Pro
         )}
 
         {step === "confirm-materialize" && (
-          <div className="space-y-5">
-            <h2 id="recurring-modal-title" className="font-display text-2xl text-ink">
-              {t("confirmMaterializeTitle")}
-            </h2>
-            <p className="text-ink-muted">
-              {t("confirmMaterializeBody", { month: currentMonthLabel })}
-            </p>
-            <div className="flex items-center gap-3 pt-2">
-              <button
-                className="btn-primary"
-                onClick={handleMaterialize}
-                disabled={materializeBusy}
-              >
-                {materializeBusy ? tCommon("saving") : t("confirmYes")}
-              </button>
-              <button className="btn-ghost" onClick={onClose}>
-                {t("confirmNo")}
-              </button>
-            </div>
-          </div>
+          <MaterializeConfirmStep
+            currentMonthLabel={currentMonthLabel}
+            busy={materializeBusy}
+            onConfirm={handleMaterialize}
+            onSkip={onClose}
+          />
         )}
       </div>
     </div>

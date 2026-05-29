@@ -2,91 +2,102 @@
 
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { RecurringExpenseForm } from "@/components/RecurringExpenseForm";
+
+import { ExpenseForm } from "@/components/expenses/ExpenseForm";
 import { useFormat } from "@/lib/useFormat";
 import type {
   Category,
-  RecurringExpense,
-  RecurringExpenseUpdatePayload,
+  Expense,
+  ExpenseUpdatePayload,
 } from "@/types/api";
 
 interface Props {
-  rules: RecurringExpense[];
+  expenses: Expense[];
   categories: Category[];
-  onUpdate: (id: string, payload: RecurringExpenseUpdatePayload) => Promise<void>;
+  total: number;
+  onUpdate: (id: string, payload: ExpenseUpdatePayload) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
 }
 
-export function RecurringExpenseList({ rules, categories, onUpdate, onDelete }: Props) {
+export function ExpenseList({
+  expenses,
+  categories,
+  total,
+  onUpdate,
+  onDelete,
+}: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-  const t = useTranslations("recurring");
+  const t = useTranslations("expenses");
   const tCommon = useTranslations("common");
-  const { formatCurrency } = useFormat();
+  const { formatCurrency, formatDate } = useFormat();
 
-  if (rules.length === 0) {
+  const totalAmount = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+
+  if (expenses.length === 0) {
     return (
       <div className="bg-paper-card border border-paper-line rounded p-12 text-center shadow-card">
-        <p className="text-ink-muted">{t("noRules")}</p>
+        <p className="text-ink-muted">{t("noMatchingExpenses")}</p>
       </div>
     );
   }
 
   return (
     <div className="bg-paper-card border border-paper-line rounded shadow-card overflow-hidden">
+      <div className="px-4 py-3 border-b border-paper-line flex items-baseline justify-between">
+        <div className="text-xs uppercase tracking-[0.12em] text-ink-muted font-medium">
+          {t("expenseCount", { count: total })}
+        </div>
+        <div className="text-amount text-lg text-ink">
+          {formatCurrency(totalAmount)}
+          <span className="text-xs text-ink-muted ml-2">{t("shown")}</span>
+        </div>
+      </div>
+
       <ul className="divide-y divide-paper-line">
-        {rules.map((rule) => {
-          const isEditing = editingId === rule.id;
-          const isConfirming = confirmDeleteId === rule.id;
+        {expenses.map((e) => {
+          const isEditing = editingId === e.id;
+          const isConfirming = confirmDeleteId === e.id;
 
           return (
-            <li key={rule.id} className="px-4 py-3">
+            <li key={e.id} className="px-4 py-3">
               {isEditing ? (
                 <div className="py-2">
-                  <RecurringExpenseForm
+                  <ExpenseForm
                     categories={categories}
-                    initial={rule}
+                    initial={e}
                     submitLabel={t("update")}
                     onCancel={() => setEditingId(null)}
                     onSubmit={async (data) => {
-                      await onUpdate(rule.id, data);
+                      await onUpdate(e.id, data);
                       setEditingId(null);
                     }}
                   />
                 </div>
               ) : (
                 <div className="flex items-center gap-4">
+                  <div className="w-20 shrink-0 text-xs text-ink-muted">
+                    {formatDate(e.expense_date)}
+                  </div>
+
                   <div className="w-28 shrink-0">
                     <span className="inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded border border-paper-line text-ink-muted">
-                      {rule.category.icon && <span>{rule.category.icon}</span>}
-                      <span>{rule.category.name}</span>
+                      {e.category.icon && <span>{e.category.icon}</span>}
+                      <span>{e.category.name}</span>
                     </span>
                   </div>
 
-                  <div className="flex-1 min-w-0">
-                    <div className="text-ink truncate">{rule.description}</div>
-                    <div className="text-xs text-ink-muted mt-0.5">
-                      {t("everyDay", { day: rule.day_of_month })}
-                      {rule.end_date && (
-                        <span className="ml-2">· until {rule.end_date}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="text-amount text-ink shrink-0">
-                    {formatCurrency(rule.amount)}
-                  </div>
-
-                  <div className="shrink-0">
-                    {rule.is_active ? (
-                      <span className="inline-flex items-center text-xs px-2 py-0.5 rounded bg-paper-line/60 text-ink-muted">
-                        {t("active")}
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center text-xs px-2 py-0.5 rounded bg-paper-line/60 text-ink-muted opacity-60">
-                        {t("paused")}
+                  <div className="flex-1 min-w-0 flex items-center gap-2 min-w-0">
+                    <span className="text-ink truncate">{e.description}</span>
+                    {e.is_recurring && (
+                      <span className="shrink-0 inline-flex items-center text-xs px-1.5 py-0.5 rounded border border-paper-line text-ink-muted bg-paper-line/30">
+                        {t("recurringBadge")}
                       </span>
                     )}
+                  </div>
+
+                  <div className="text-amount text-ink">
+                    {formatCurrency(e.amount)}
                   </div>
 
                   <div className="flex items-center gap-1 shrink-0">
@@ -98,7 +109,7 @@ export function RecurringExpenseList({ rules, categories, onUpdate, onDelete }: 
                         <button
                           className="btn-danger"
                           onClick={async () => {
-                            await onDelete(rule.id);
+                            await onDelete(e.id);
                             setConfirmDeleteId(null);
                           }}
                         >
@@ -115,13 +126,13 @@ export function RecurringExpenseList({ rules, categories, onUpdate, onDelete }: 
                       <>
                         <button
                           className="btn-ghost"
-                          onClick={() => setEditingId(rule.id)}
+                          onClick={() => setEditingId(e.id)}
                         >
                           {tCommon("edit")}
                         </button>
                         <button
                           className="btn-danger"
-                          onClick={() => setConfirmDeleteId(rule.id)}
+                          onClick={() => setConfirmDeleteId(e.id)}
                         >
                           {tCommon("delete")}
                         </button>

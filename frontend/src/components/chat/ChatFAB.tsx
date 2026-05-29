@@ -10,7 +10,7 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
-import { ChatPanel } from "@/components/ChatPanel";
+import { ChatPanel } from "@/components/chat/ChatPanel";
 
 export function ChatFAB() {
   const [open, setOpen] = useState(false);

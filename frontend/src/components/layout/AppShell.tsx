@@ -1,8 +1,8 @@
 "use client";
 
-import { ChatActionsProvider } from "@/components/ChatActionsProvider";
-import { ChatFAB } from "@/components/ChatFAB";
-import { Sidebar } from "@/components/Sidebar";
+import { ChatActionsProvider } from "@/components/chat/ChatActionsProvider";
+import { ChatFAB } from "@/components/chat/ChatFAB";
+import { Sidebar } from "@/components/layout/Sidebar";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (

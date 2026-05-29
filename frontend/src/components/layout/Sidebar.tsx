@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { useLocale } from "@/components/LocaleProvider";
 import { SUPPORTED_LOCALES, type Locale } from "@/lib/i18n";
 

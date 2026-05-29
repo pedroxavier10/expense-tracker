@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { EXPENSE_CREATED_EVENT } from "@/components/ChatActionsProvider";
+import { EXPENSE_CREATED_EVENT } from "@/components/chat/ChatActionsProvider";
 import * as api from "@/lib/api";
 import type { Expense, ExpenseFilters } from "@/types/api";
 
