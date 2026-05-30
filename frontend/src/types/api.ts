@@ -10,6 +10,23 @@ export interface Category {
   slug: string;
   name: string;
   icon: string | null;
+  is_active: boolean;
+}
+
+export interface CategoryCreatePayload {
+  name: string;
+  icon?: string | null;
+}
+
+export interface CategoryUpdatePayload {
+  name?: string;
+  icon?: string | null;
+  is_active?: boolean;
+}
+
+export interface CategoryDeleteResult {
+  action: "deleted" | "archived";
+  category: Category | null;
 }
 
 export interface Expense {

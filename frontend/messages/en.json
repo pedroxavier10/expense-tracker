@@ -104,8 +104,16 @@
   },
   "categories": {
     "title": "Categories",
-    "subtitle": "Available spending categories.",
-    "noCategoriesFound": "No categories found."
+    "subtitle": "Create, edit and organize your spending categories.",
+    "noCategoriesFound": "No categories found.",
+    "add": "Add category",
+    "restore": "Restore",
+    "archived": "Archived",
+    "nameLabel": "Name",
+    "namePlaceholder": "e.g. Groceries",
+    "iconLabel": "Icon",
+    "slugAutoNote": "A slug is generated automatically for the assistant.",
+    "confirmDeleteNote": "If this category has expenses, it will be archived instead of deleted."
   },
   "reports": {
     "title": "Reports",

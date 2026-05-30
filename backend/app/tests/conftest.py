@@ -16,7 +16,6 @@ from sqlmodel import Session, SQLModel, create_engine
 
 from app.api.deps import get_session
 from app.core.security import create_access_token
-from app.db.seed import seed_categories
 from app.main import app
 from app.services import user_service
 
@@ -36,7 +35,6 @@ def session_fixture() -> Generator[Session, None, None]:
 
     SQLModel.metadata.create_all(engine)
     with Session(engine) as session:
-        seed_categories(session)
         yield session
 
 
@@ -53,7 +51,9 @@ def client_fixture(session: Session) -> Generator[TestClient, None, None]:
 
 @pytest.fixture(name="auth_headers")
 def auth_headers_fixture(session: Session) -> dict[str, str]:
-    """Create a test user and return the Authorization header."""
-    user = user_service.create_user(session, email="test@example.com", password="testpass123")
+    """Create a test user (with default categories) and return the auth header."""
+    user = user_service.create_user_with_defaults(
+        session, email="test@example.com", password="testpass123"
+    )
     token = create_access_token(subject=str(user.id))
     return {"Authorization": f"Bearer {token}"}

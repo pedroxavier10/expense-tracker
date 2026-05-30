@@ -11,6 +11,9 @@
 import type {
   AnnualSummaryResponse,
   Category,
+  CategoryCreatePayload,
+  CategoryDeleteResult,
+  CategoryUpdatePayload,
   ChatMessage,
   ChatStreamEvent,
   Expense,
@@ -126,8 +129,36 @@ export function logout(): void {
 
 // ---------- Categories ----------
 
-export async function listCategories(): Promise<Category[]> {
-  return request<Category[]>("/categories");
+export async function listCategories(
+  includeInactive = false
+): Promise<Category[]> {
+  const q = includeInactive ? "?include_inactive=true" : "";
+  return request<Category[]>(`/categories${q}`);
+}
+
+export async function createCategory(
+  payload: CategoryCreatePayload
+): Promise<Category> {
+  return request<Category>("/categories", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateCategory(
+  id: string,
+  payload: CategoryUpdatePayload
+): Promise<Category> {
+  return request<Category>(`/categories/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteCategory(id: string): Promise<CategoryDeleteResult> {
+  return request<CategoryDeleteResult>(`/categories/${id}`, {
+    method: "DELETE",
+  });
 }
 
 // ---------- Expenses ----------

@@ -5,6 +5,7 @@ whole point of the tool design: every tool is unit-testable in isolation.
 """
 
 from decimal import Decimal
+
 from sqlmodel import Session
 
 from app.llm.tools.monthly_summary import MonthlySummaryInput, monthly_summary
@@ -18,9 +19,11 @@ from app.services import category_service, user_service
 
 
 def _make_user_and_expenses(session: Session) -> tuple:
-    user = user_service.create_user(session, email="llm@example.com", password="pw12345678")
-    food = category_service.get_category_by_slug(session, "food")
-    transport = category_service.get_category_by_slug(session, "transport")
+    user = user_service.create_user_with_defaults(
+        session, email="llm@example.com", password="pw12345678"
+    )
+    food = category_service.get_category_by_slug(session, user.id, "food")
+    transport = category_service.get_category_by_slug(session, user.id, "transport")
     assert food and transport
 
     rows = [
@@ -88,8 +91,10 @@ def test_top_categories_respects_limit(session: Session) -> None:
 
 
 def test_open_add_expense_form_resolves_slug(session: Session) -> None:
-    user = user_service.create_user(session, email="form@example.com", password="pw12345678")
-    food = category_service.get_category_by_slug(session, "food")
+    user = user_service.create_user_with_defaults(
+        session, email="form@example.com", password="pw12345678"
+    )
+    food = category_service.get_category_by_slug(session, user.id, "food")
     assert food
 
     result = open_add_expense_form(

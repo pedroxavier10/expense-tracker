@@ -32,7 +32,7 @@ def list_recurring_expenses(
 def create_recurring_expense(
     payload: RecurringExpenseCreate, session: SessionDep, current_user: CurrentUser
 ) -> RecurringExpenseRead:
-    if not category_service.get_category(session, payload.category_id):
+    if not category_service.get_category(session, current_user.id, payload.category_id):
         raise HTTPException(status_code=404, detail="Category not found")
     rule = recurring_expense_service.create_recurring_expense(session, current_user.id, payload)
     return RecurringExpenseRead.model_validate(rule)
@@ -63,7 +63,9 @@ def update_recurring_expense(
     session: SessionDep,
     current_user: CurrentUser,
 ) -> RecurringExpenseRead:
-    if payload.category_id and not category_service.get_category(session, payload.category_id):
+    if payload.category_id and not category_service.get_category(
+        session, current_user.id, payload.category_id
+    ):
         raise HTTPException(status_code=404, detail="Category not found")
     rule = recurring_expense_service.update_recurring_expense(
         session, current_user.id, rule_id, payload
