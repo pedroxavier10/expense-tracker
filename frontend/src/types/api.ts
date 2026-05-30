@@ -91,6 +91,36 @@ export interface Token {
   token_type: string;
 }
 
+// ---------- Reports / summary ----------
+
+export interface CategorySummary {
+  category_id: string;
+  slug: string;
+  name: string;
+  icon: string | null;
+  total: string; // Decimal serialized as string
+  count: number;
+}
+
+export interface MonthlySummaryResponse {
+  month: string; // YYYY-MM
+  total: string;
+  count: number;
+  by_category: CategorySummary[];
+}
+
+export interface MonthlyTotal {
+  month: string; // YYYY-MM
+  total: string;
+}
+
+export interface AnnualSummaryResponse {
+  year: number;
+  total: string;
+  by_month: MonthlyTotal[];
+  by_category: CategorySummary[];
+}
+
 // ---------- Chat ----------
 
 export type ChatRole = "user" | "assistant";

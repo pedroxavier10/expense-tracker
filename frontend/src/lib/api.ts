@@ -9,6 +9,7 @@
  */
 
 import type {
+  AnnualSummaryResponse,
   Category,
   ChatMessage,
   ChatStreamEvent,
@@ -17,6 +18,7 @@ import type {
   ExpenseFilters,
   ExpenseListResponse,
   ExpenseUpdatePayload,
+  MonthlySummaryResponse,
   RecurringExpense,
   RecurringExpenseCreatePayload,
   RecurringExpenseUpdatePayload,
@@ -167,6 +169,14 @@ export async function updateExpense(
 
 export async function deleteExpense(id: string): Promise<void> {
   return request<void>(`/expenses/${id}`, { method: "DELETE" });
+}
+
+export async function getMonthSummary(month: string): Promise<MonthlySummaryResponse> {
+  return request<MonthlySummaryResponse>(`/expenses/summary?month=${month}`);
+}
+
+export async function getAnnualSummary(year: number): Promise<AnnualSummaryResponse> {
+  return request<AnnualSummaryResponse>(`/expenses/annual-summary?year=${year}`);
 }
 
 // ---------- Recurring Expenses ----------

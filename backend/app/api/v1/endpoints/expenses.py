@@ -7,11 +7,13 @@ from fastapi import APIRouter, HTTPException, Query, status
 
 from app.api.deps import CurrentUser, SessionDep
 from app.schemas.expense import (
+    AnnualSummaryResponse,
     ExpenseCreate,
     ExpenseFilters,
     ExpenseListResponse,
     ExpenseRead,
     ExpenseUpdate,
+    MonthlySummaryResponse,
 )
 from app.services import category_service, expense_service
 
@@ -74,6 +76,37 @@ def create_expense(
         raise HTTPException(status_code=404, detail="Category not found")
     expense = expense_service.create_expense(session, current_user.id, payload)
     return ExpenseRead.model_validate(expense)
+
+
+@router.get(
+    "/summary",
+    response_model=MonthlySummaryResponse,
+    summary="Monthly spending summary (totals by category)",
+)
+def get_monthly_summary(
+    session: SessionDep,
+    current_user: CurrentUser,
+    month: str = Query(
+        description="Month in YYYY-MM format",
+        pattern=r"^\d{4}-(0[1-9]|1[0-2])$",
+    ),
+) -> MonthlySummaryResponse:
+    result = expense_service.get_monthly_summary(session, current_user.id, month)
+    return MonthlySummaryResponse.model_validate(result)
+
+
+@router.get(
+    "/annual-summary",
+    response_model=AnnualSummaryResponse,
+    summary="Annual spending summary (monthly totals + breakdown by category)",
+)
+def get_annual_summary(
+    session: SessionDep,
+    current_user: CurrentUser,
+    year: int = Query(description="Calendar year, e.g. 2026", ge=2000, le=2100),
+) -> AnnualSummaryResponse:
+    result = expense_service.get_annual_summary(session, current_user.id, year)
+    return AnnualSummaryResponse.model_validate(result)
 
 
 @router.get("/{expense_id}", response_model=ExpenseRead, summary="Get an expense by id")
