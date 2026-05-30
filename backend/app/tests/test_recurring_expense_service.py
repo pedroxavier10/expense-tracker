@@ -48,20 +48,22 @@ def _make_rule(session: Session, user_id, category_id, day=10, is_active=True, e
     return rule
 
 
-def _get_food_category_id(session: Session):
+def _get_food_category_id(session: Session, user_id):
     from sqlmodel import select
     from app.models.category import Category
-    return session.exec(select(Category).where(Category.slug == "food")).first().id
+    return session.exec(
+        select(Category).where(Category.user_id == user_id, Category.slug == "food")
+    ).first().id
 
 
 def _create_test_user(session: Session, email="rule_test@example.com"):
     from app.services import user_service
-    return user_service.create_user(session, email=email, password="pass123")
+    return user_service.create_user_with_defaults(session, email=email, password="pass123")
 
 
 def test_materialize_creates_expense(session: Session):
     user = _create_test_user(session)
-    cat_id = _get_food_category_id(session)
+    cat_id = _get_food_category_id(session, user.id)
     rule = _make_rule(session, user.id, cat_id, day=10)
 
     expense = materialize_for_rule(session, rule, 2026, 5)
@@ -76,7 +78,7 @@ def test_materialize_creates_expense(session: Session):
 
 def test_materialize_clamps_day_to_last(session: Session):
     user = _create_test_user(session, "clamp@example.com")
-    cat_id = _get_food_category_id(session)
+    cat_id = _get_food_category_id(session, user.id)
     rule = _make_rule(session, user.id, cat_id, day=31)
 
     expense = materialize_for_rule(session, rule, 2026, 2)
@@ -87,7 +89,7 @@ def test_materialize_clamps_day_to_last(session: Session):
 
 def test_materialize_idempotent(session: Session):
     user = _create_test_user(session, "idempotent@example.com")
-    cat_id = _get_food_category_id(session)
+    cat_id = _get_food_category_id(session, user.id)
     rule = _make_rule(session, user.id, cat_id, day=5)
 
     first = materialize_for_rule(session, rule, 2026, 5)
@@ -99,7 +101,7 @@ def test_materialize_idempotent(session: Session):
 
 def test_materialize_inactive_rule_skipped(session: Session):
     user = _create_test_user(session, "inactive@example.com")
-    cat_id = _get_food_category_id(session)
+    cat_id = _get_food_category_id(session, user.id)
     rule = _make_rule(session, user.id, cat_id, is_active=False)
 
     result = materialize_for_rule(session, rule, 2026, 5)
@@ -109,7 +111,7 @@ def test_materialize_inactive_rule_skipped(session: Session):
 
 def test_materialize_past_end_date_skipped(session: Session):
     user = _create_test_user(session, "enddate@example.com")
-    cat_id = _get_food_category_id(session)
+    cat_id = _get_food_category_id(session, user.id)
     rule = _make_rule(session, user.id, cat_id, end_date=date(2026, 4, 30))
 
     result = materialize_for_rule(session, rule, 2026, 5)
@@ -119,7 +121,7 @@ def test_materialize_past_end_date_skipped(session: Session):
 
 def test_materialize_end_date_same_month_allowed(session: Session):
     user = _create_test_user(session, "enddatesame@example.com")
-    cat_id = _get_food_category_id(session)
+    cat_id = _get_food_category_id(session, user.id)
     # end_date is within the target month, not before it
     rule = _make_rule(session, user.id, cat_id, day=10, end_date=date(2026, 5, 15))
 
@@ -130,7 +132,7 @@ def test_materialize_end_date_same_month_allowed(session: Session):
 
 def test_materialize_all_creates_for_active_rules(session: Session):
     user = _create_test_user(session, "all_test@example.com")
-    cat_id = _get_food_category_id(session)
+    cat_id = _get_food_category_id(session, user.id)
 
     _make_rule(session, user.id, cat_id, day=5)
     _make_rule(session, user.id, cat_id, day=15)
@@ -143,7 +145,7 @@ def test_materialize_all_creates_for_active_rules(session: Session):
 
 def test_materialize_all_idempotent(session: Session):
     user = _create_test_user(session, "all_idempotent@example.com")
-    cat_id = _get_food_category_id(session)
+    cat_id = _get_food_category_id(session, user.id)
     _make_rule(session, user.id, cat_id, day=10)
 
     first_run = materialize_all(session, 2026, 5)

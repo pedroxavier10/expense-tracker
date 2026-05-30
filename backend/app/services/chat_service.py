@@ -128,7 +128,7 @@ async def stream_chat(
     settings = get_settings()
     client = get_llm_client()
 
-    categories = fetch_categories(session)
+    categories = fetch_categories(session, user_id)
     messages: list[dict[str, Any]] = [
         {"role": "system", "content": _build_system_prompt(categories, language)},
         *[{"role": m.role.value, "content": m.content} for m in request.messages],

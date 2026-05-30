@@ -54,6 +54,10 @@ class Settings(BaseSettings):
     llm_base_url: str = "http://localhost:11434/v1"
     llm_api_key: str = "ollama"  # ignored by Ollama; required by the OpenAI client
     llm_model: str = "llama3.2"
+    # Model for short utility tasks (e.g. generating a category slug). Falls
+    # back to llm_model when unset; can point at a small/fast model such as
+    # Groq's "llama-3.1-8b-instant".
+    llm_utility_model: str | None = None
     llm_temperature: float = 0.2
     llm_max_tool_iterations: int = 6  # safety limit on the tool-calling loop
 

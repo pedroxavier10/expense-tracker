@@ -104,8 +104,16 @@
   },
   "categories": {
     "title": "Categorias",
-    "subtitle": "Categorias de despesas disponíveis.",
-    "noCategoriesFound": "Sem categorias."
+    "subtitle": "Cria, edita e organiza as tuas categorias de despesas.",
+    "noCategoriesFound": "Sem categorias.",
+    "add": "Adicionar categoria",
+    "restore": "Restaurar",
+    "archived": "Arquivadas",
+    "nameLabel": "Nome",
+    "namePlaceholder": "ex.: Supermercado",
+    "iconLabel": "Ícone",
+    "slugAutoNote": "É gerado automaticamente um slug para o assistente.",
+    "confirmDeleteNote": "Se esta categoria tiver despesas, será arquivada em vez de eliminada."
   },
   "reports": {
     "title": "Relatórios",

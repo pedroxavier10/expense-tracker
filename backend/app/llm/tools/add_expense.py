@@ -34,7 +34,7 @@ class AddExpenseInput(BaseModel):
 
 
 def add_expense(session: Session, user_id: UUID, payload: AddExpenseInput) -> dict:
-    if not category_service.get_category(session, payload.category_id):
+    if not category_service.get_category(session, user_id, payload.category_id):
         raise HTTPException(status_code=404, detail="Category not found")
     expense_data = ExpenseCreate(
         amount=Decimal(str(payload.amount)),

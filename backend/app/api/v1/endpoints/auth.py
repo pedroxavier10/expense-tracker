@@ -5,15 +5,15 @@ endpoint. The default user is created during the seed step. Add registration
 later if you ever open this up to other users.
 """
 
-from fastapi import APIRouter, HTTPException, status
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.api.deps import CurrentUser, SessionDep
 from app.core.security import create_access_token
 from app.schemas.user import LoginRequest, Token, UserRead, UserUpdate
 from app.services import user_service
-from typing import Annotated
-from fastapi import Depends
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

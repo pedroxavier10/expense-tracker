@@ -36,12 +36,21 @@ def open_add_expense_form(
 ) -> dict:
     category_id: str | None = None
     if payload.category_slug:
-        cat = category_service.get_category_by_slug(session, payload.category_slug)
+        cat = category_service.get_category_by_slug(session, user_id, payload.category_slug)
         if cat:
             category_id = str(cat.id)
 
+    # `amount` is a float on the input model (see note on the field above:
+    # Decimal would emit a lookahead-regex JSON Schema that Groq rejects with a
+    # 400). The float loses trailing-zero precision (23.00 -> 23.0), so we
+    # quantize back to 2 decimals here to keep money in canonical "0.00" string
+    # form for the wire / frontend prefill.
     prefill = {
-        "amount": str(Decimal(str(payload.amount))) if payload.amount is not None else None,
+        "amount": (
+            str(Decimal(str(payload.amount)).quantize(Decimal("0.01")))
+            if payload.amount is not None
+            else None
+        ),
         "expense_date": payload.expense_date.isoformat() if payload.expense_date else None,
         "description": payload.description,
         "category_id": category_id,

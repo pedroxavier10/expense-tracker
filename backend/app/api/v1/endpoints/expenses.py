@@ -72,7 +72,7 @@ def list_expenses(
 def create_expense(
     payload: ExpenseCreate, session: SessionDep, current_user: CurrentUser
 ) -> ExpenseRead:
-    if not category_service.get_category(session, payload.category_id):
+    if not category_service.get_category(session, current_user.id, payload.category_id):
         raise HTTPException(status_code=404, detail="Category not found")
     expense = expense_service.create_expense(session, current_user.id, payload)
     return ExpenseRead.model_validate(expense)
@@ -126,7 +126,9 @@ def update_expense(
     session: SessionDep,
     current_user: CurrentUser,
 ) -> ExpenseRead:
-    if payload.category_id and not category_service.get_category(session, payload.category_id):
+    if payload.category_id and not category_service.get_category(
+        session, current_user.id, payload.category_id
+    ):
         raise HTTPException(status_code=404, detail="Category not found")
     expense = expense_service.update_expense(session, current_user.id, expense_id, payload)
     if not expense:

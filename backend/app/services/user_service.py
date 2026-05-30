@@ -31,6 +31,23 @@ def create_user(session: Session, email: str, password: str) -> User:
     return user
 
 
+def create_user_with_defaults(session: Session, email: str, password: str) -> User:
+    """Create a user and seed their default categories.
+
+    Use this for any new-user flow (seed today, a future /register endpoint).
+    The default slugs are already English, so no LLM call is needed here.
+    """
+    # Imported lazily to avoid a circular import (category_service -> slug_service).
+    from app.services import category_service
+
+    user = create_user(session, email, password)
+    for slug, name, icon in category_service.DEFAULT_CATEGORIES:
+        category_service.create_category(
+            session, user.id, slug=slug, name=name, icon=icon
+        )
+    return user
+
+
 def update_user(session: Session, user: User, updates: UserUpdate) -> User:
     """Apply non-None fields from `updates` to `user` and persist."""
     data = updates.model_dump(exclude_unset=True, exclude_none=True)
