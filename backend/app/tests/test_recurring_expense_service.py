@@ -1,6 +1,6 @@
 """Unit tests for recurring_expense_service — especially date clamping and idempotency."""
 
-from datetime import date, datetime, UTC
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from uuid import uuid4
 
@@ -14,23 +14,27 @@ from app.services.recurring_expense_service import (
     resolve_expense_date,
 )
 
-
 # --- resolve_expense_date ---
 
-@pytest.mark.parametrize("year,month,day,expected", [
-    (2026, 2, 31, date(2026, 2, 28)),   # non-leap February
-    (2024, 2, 31, date(2024, 2, 29)),   # leap February
-    (2026, 4, 31, date(2026, 4, 30)),   # April has 30 days
-    (2026, 1, 15, date(2026, 1, 15)),   # normal day, no clamping
-    (2026, 3, 31, date(2026, 3, 31)),   # March has 31 days, no clamping
-    (2026, 6, 30, date(2026, 6, 30)),   # last day of June
-    (2026, 6, 31, date(2026, 6, 30)),   # June only has 30 days
-])
+
+@pytest.mark.parametrize(
+    "year,month,day,expected",
+    [
+        (2026, 2, 31, date(2026, 2, 28)),  # non-leap February
+        (2024, 2, 31, date(2024, 2, 29)),  # leap February
+        (2026, 4, 31, date(2026, 4, 30)),  # April has 30 days
+        (2026, 1, 15, date(2026, 1, 15)),  # normal day, no clamping
+        (2026, 3, 31, date(2026, 3, 31)),  # March has 31 days, no clamping
+        (2026, 6, 30, date(2026, 6, 30)),  # last day of June
+        (2026, 6, 31, date(2026, 6, 30)),  # June only has 30 days
+    ],
+)
 def test_resolve_expense_date(year, month, day, expected):
     assert resolve_expense_date(year, month, day) == expected
 
 
 # --- materialize_for_rule ---
+
 
 def _make_rule(session: Session, user_id, category_id, day=10, is_active=True, end_date=None):
     rule = RecurringExpense(
@@ -51,13 +55,17 @@ def _make_rule(session: Session, user_id, category_id, day=10, is_active=True, e
 def _get_food_category_id(session: Session, user_id):
     from sqlmodel import select
     from app.models.category import Category
-    return session.exec(
-        select(Category).where(Category.user_id == user_id, Category.slug == "food")
-    ).first().id
+
+    return (
+        session.exec(select(Category).where(Category.user_id == user_id, Category.slug == "food"))
+        .first()
+        .id
+    )
 
 
 def _create_test_user(session: Session, email="rule_test@example.com"):
     from app.services import user_service
+
     return user_service.create_user_with_defaults(session, email=email, password="pass123")
 
 

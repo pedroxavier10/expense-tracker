@@ -166,7 +166,12 @@ def test_monthly_summary_aggregates_correctly(
     for amount, cat_id in [("10.00", food_id), ("5.50", food_id), ("20.00", transport_id)]:
         client.post(
             "/api/v1/expenses",
-            json={"amount": amount, "expense_date": "2025-03-15", "description": "x", "category_id": cat_id},
+            json={
+                "amount": amount,
+                "expense_date": "2025-03-15",
+                "description": "x",
+                "category_id": cat_id,
+            },
             headers=auth_headers,
         )
 
@@ -206,12 +211,22 @@ def test_annual_summary_aggregates_correctly(
 
     client.post(
         "/api/v1/expenses",
-        json={"amount": "100.00", "expense_date": "2024-01-10", "description": "jan", "category_id": food_id},
+        json={
+            "amount": "100.00",
+            "expense_date": "2024-01-10",
+            "description": "jan",
+            "category_id": food_id,
+        },
         headers=auth_headers,
     )
     client.post(
         "/api/v1/expenses",
-        json={"amount": "200.00", "expense_date": "2024-06-15", "description": "jun", "category_id": food_id},
+        json={
+            "amount": "200.00",
+            "expense_date": "2024-06-15",
+            "description": "jun",
+            "category_id": food_id,
+        },
         headers=auth_headers,
     )
 

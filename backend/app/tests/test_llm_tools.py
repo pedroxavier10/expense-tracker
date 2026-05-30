@@ -5,6 +5,7 @@ whole point of the tool design: every tool is unit-testable in isolation.
 """
 
 from decimal import Decimal
+
 from sqlmodel import Session
 
 from app.llm.tools.monthly_summary import MonthlySummaryInput, monthly_summary
