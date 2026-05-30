@@ -15,16 +15,7 @@ import {
 } from "recharts";
 import { useFormat } from "@/lib/useFormat";
 
-const PALETTE = [
-  "#1a1a1a",
-  "#c2410c",
-  "#3d3d3d",
-  "#6b6660",
-  "#a8a8a8",
-  "#606060",
-  "#848484",
-  "#e8e3dc",
-];
+const PALETTE = ["#c2410c", "#0f766e", "#0369a1", "#6d28d9", "#be185d", "#15803d", "#b45309", "#475569"];
 
 interface MonthlyDatum {
   month: string;
@@ -87,7 +78,7 @@ export function ReportsCharts({ monthlyData, categoryData, categoryTitle, loadin
                     fontSize: "12px",
                   }}
                 />
-                <Bar dataKey="total" fill="#1a1a1a" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="total" fill={PALETTE[0]} radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
