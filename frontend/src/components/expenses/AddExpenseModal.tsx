@@ -34,7 +34,7 @@ export function AddExpenseModal({ categories, onSubmit, onClose, initialValues }
         className="absolute inset-0 bg-ink/40"
         onClick={onClose}
       />
-      <div className="relative bg-paper-card border border-paper-line rounded shadow-card w-full max-w-lg mx-4 p-6">
+      <div className="relative bg-paper-card border border-paper-line rounded shadow-card w-full max-w-lg mx-4 p-6 max-h-[90dvh] overflow-y-auto">
         <div className="flex items-center justify-between mb-5">
           <h2 id="modal-title" className="font-display text-2xl text-ink">
             {t("addExpense")}

@@ -26,7 +26,21 @@
     "collapse": "Collapse",
     "expandSidebar": "Expand sidebar",
     "collapseSidebar": "Collapse sidebar",
-    "language": "Language"
+    "language": "Language",
+    "more": "More",
+    "mainNavigation": "Main navigation"
+  },
+  "pwa": {
+    "install": "Install",
+    "installBody": "Install Ledger-x on this device for quicker access.",
+    "installIosHint": "To install: tap Share, then “Add to Home Screen”.",
+    "dismiss": "Dismiss",
+    "updateAvailable": "A new version is available.",
+    "reload": "Reload",
+    "offlineBanner": "You are offline. Changes can’t be saved right now.",
+    "offlineTitle": "You’re offline",
+    "offlineBody": "Ledger-x needs a connection to load your expenses. Check your network and try again.",
+    "retry": "Try again"
   },
   "login": {
     "email": "Email",

@@ -55,12 +55,12 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl text-ink">{t("title")}</h1>
           <p className="text-sm text-ink-muted mt-1 capitalize">{monthLabel}</p>
         </div>
-        <button className="btn-primary" onClick={() => setShowModal(true)}>
+        <button className="btn-primary shrink-0" onClick={() => setShowModal(true)}>
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="M7 1v12M1 7h12" />
           </svg>
@@ -69,7 +69,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <SummaryCard
           title={t("spentThisMonth")}
           value={loading ? "—" : formatCurrency(monthlyTotal)}

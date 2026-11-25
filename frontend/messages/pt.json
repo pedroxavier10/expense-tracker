@@ -26,7 +26,21 @@
     "collapse": "Recolher",
     "expandSidebar": "Expandir barra lateral",
     "collapseSidebar": "Recolher barra lateral",
-    "language": "Língua"
+    "language": "Língua",
+    "more": "Mais",
+    "mainNavigation": "Navegação principal"
+  },
+  "pwa": {
+    "install": "Instalar",
+    "installBody": "Instala o Ledger-x neste dispositivo para um acesso mais rápido.",
+    "installIosHint": "Para instalar: toca em Partilhar e depois em “Adicionar ao ecrã principal”.",
+    "dismiss": "Dispensar",
+    "updateAvailable": "Está disponível uma nova versão.",
+    "reload": "Recarregar",
+    "offlineBanner": "Estás sem ligação. Não é possível guardar alterações.",
+    "offlineTitle": "Estás offline",
+    "offlineBody": "O Ledger-x precisa de ligação para carregar as tuas despesas. Verifica a rede e tenta de novo.",
+    "retry": "Tentar de novo"
   },
   "login": {
     "email": "Email",
