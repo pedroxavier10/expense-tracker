@@ -75,19 +75,21 @@ export function ExpenseList({
                   />
                 </div>
               ) : (
-                <div className="flex items-center gap-4">
-                  <div className="w-20 shrink-0 text-xs text-ink-muted">
+                // Mobile: line 1 = description + amount, line 2 = date, category, actions.
+                // From md up every `order` is reset, restoring the single-row layout.
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 md:flex-nowrap md:gap-4">
+                  <div className="order-2 w-20 shrink-0 text-xs text-ink-muted md:order-none">
                     {formatDate(e.expense_date)}
                   </div>
 
-                  <div className="w-28 shrink-0">
+                  <div className="order-2 shrink-0 md:order-none md:w-28">
                     <span className="inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded border border-paper-line text-ink-muted">
                       {e.category.icon && <span>{e.category.icon}</span>}
                       <span>{e.category.name}</span>
                     </span>
                   </div>
 
-                  <div className="flex-1 min-w-0 flex items-center gap-2">
+                  <div className="order-1 flex-1 min-w-0 flex items-center gap-2 md:order-none">
                     <span className="text-ink truncate">{e.description}</span>
                     {e.is_recurring && (
                       <span className="shrink-0 inline-flex items-center text-xs px-1.5 py-0.5 rounded border border-paper-line text-ink-muted bg-paper-line/30">
@@ -96,11 +98,14 @@ export function ExpenseList({
                     )}
                   </div>
 
-                  <div className="text-amount text-ink">
+                  <div className="order-1 shrink-0 text-amount text-ink md:order-none">
                     {formatCurrency(e.amount)}
                   </div>
 
-                  <div className="flex items-center gap-1 shrink-0">
+                  {/* Forces the line break after the amount on mobile only. */}
+                  <div className="order-1 basis-full md:hidden" aria-hidden="true" />
+
+                  <div className="order-2 ml-auto flex items-center gap-1 shrink-0 md:order-none md:ml-0">
                     {isConfirming ? (
                       <>
                         <span className="text-xs text-ink-muted mr-2">

@@ -55,15 +55,17 @@ export function RecurringExpenseList({ rules, categories, onUpdate, onDelete }: 
                   />
                 </div>
               ) : (
-                <div className="flex items-center gap-4">
-                  <div className="w-28 shrink-0">
+                // Mobile: line 1 = description + amount, line 2 = category, status, actions.
+                // From md up every `order` is reset, restoring the single-row layout.
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 md:flex-nowrap md:gap-4">
+                  <div className="order-2 shrink-0 md:order-none md:w-28">
                     <span className="inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded border border-paper-line text-ink-muted">
                       {rule.category.icon && <span>{rule.category.icon}</span>}
                       <span>{rule.category.name}</span>
                     </span>
                   </div>
 
-                  <div className="flex-1 min-w-0">
+                  <div className="order-1 flex-1 min-w-0 md:order-none">
                     <div className="text-ink truncate">{rule.description}</div>
                     <div className="text-xs text-ink-muted mt-0.5">
                       {t("everyDay", { day: rule.day_of_month })}
@@ -73,11 +75,14 @@ export function RecurringExpenseList({ rules, categories, onUpdate, onDelete }: 
                     </div>
                   </div>
 
-                  <div className="text-amount text-ink shrink-0">
+                  <div className="order-1 text-amount text-ink shrink-0 md:order-none">
                     {formatCurrency(rule.amount)}
                   </div>
 
-                  <div className="shrink-0">
+                  {/* Forces the line break after the amount on mobile only. */}
+                  <div className="order-1 basis-full md:hidden" aria-hidden="true" />
+
+                  <div className="order-2 shrink-0 md:order-none">
                     {rule.is_active ? (
                       <span className="inline-flex items-center text-xs px-2 py-0.5 rounded bg-paper-line/60 text-ink-muted">
                         {t("active")}
@@ -89,7 +94,7 @@ export function RecurringExpenseList({ rules, categories, onUpdate, onDelete }: 
                     )}
                   </div>
 
-                  <div className="flex items-center gap-1 shrink-0">
+                  <div className="order-2 ml-auto flex items-center gap-1 shrink-0 md:order-none md:ml-0">
                     {isConfirming ? (
                       <>
                         <span className="text-xs text-ink-muted mr-2">

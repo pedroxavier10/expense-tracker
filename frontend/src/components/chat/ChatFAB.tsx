@@ -29,7 +29,7 @@ export function ChatFAB() {
     <>
       {open && (
         <div
-          className="fixed bottom-24 right-6 z-40 w-[380px] max-w-[calc(100vw-3rem)] bg-paper-card border border-paper-line rounded shadow-card overflow-hidden"
+          className="hidden md:block fixed bottom-24 right-6 z-40 w-[380px] max-w-[calc(100vw-3rem)] bg-paper-card border border-paper-line rounded shadow-card overflow-hidden"
           role="dialog"
           aria-label="Chatbot"
         >
@@ -66,7 +66,7 @@ export function ChatFAB() {
         onClick={() => setOpen((v) => !v)}
         title={open ? t("closeChat") : t("openChat")}
         aria-label={open ? t("closeChat") : t("openChat")}
-        className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-ink text-paper shadow-card hover:bg-ink-soft transition-colors flex items-center justify-center"
+        className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-ink text-paper shadow-card hover:bg-ink-soft transition-colors hidden md:flex items-center justify-center"
       >
         {open ? (
           <svg

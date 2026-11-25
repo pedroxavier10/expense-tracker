@@ -107,7 +107,7 @@ export default function ReportsPage() {
         <p className="text-sm text-ink-muted mt-1">{t("subtitle")}</p>
       </div>
 
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         {/* Mode toggle */}
         <div className="flex items-center gap-1 bg-paper-card border border-paper-line rounded p-1">
           {(["monthly", "annual"] as const).map((mode) => (
@@ -133,7 +133,7 @@ export default function ReportsPage() {
           >
             ‹
           </button>
-          <span className="text-sm font-medium w-44 text-center">
+          <span className="text-sm font-medium w-36 md:w-44 text-center">
             {viewMode === "annual" ? selectedYear : monthLabel(selectedMonthKey, intlLocale)}
           </span>
           <button

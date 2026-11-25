@@ -143,7 +143,10 @@ export function ChatPanel({ variant }: Props) {
   };
 
   const containerHeight =
-    variant === "page" ? "h-[calc(100vh-10rem)]" : "h-[480px]";
+    variant === "page"
+      ? // Mobile also subtracts the fixed BottomNav and uses dvh (dynamic browser bars).
+        "h-[calc(100dvh-14rem)] md:h-[calc(100vh-10rem)]"
+      : "h-[480px]";
 
   return (
     <div className={`flex flex-col ${containerHeight} min-h-0`}>

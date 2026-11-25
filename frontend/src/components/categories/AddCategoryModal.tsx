@@ -31,7 +31,7 @@ export function AddCategoryModal({ onSubmit, onClose }: Props) {
       className="fixed inset-0 z-50 flex items-center justify-center"
     >
       <div className="absolute inset-0 bg-ink/40" onClick={onClose} />
-      <div className="relative bg-paper-card border border-paper-line rounded shadow-card w-full max-w-md mx-4 p-6">
+      <div className="relative bg-paper-card border border-paper-line rounded shadow-card w-full max-w-md mx-4 p-6 max-h-[90dvh] overflow-y-auto">
         <div className="flex items-center justify-between mb-5">
           <h2 id="category-modal-title" className="font-display text-2xl text-ink">
             {t("add")}
