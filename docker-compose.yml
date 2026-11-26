@@ -28,8 +28,11 @@ services:
       DATABASE_URL: postgresql+psycopg://expense_user:expense_pass@db:5432/expense_tracker
       SECRET_KEY: ${SECRET_KEY:-dev-secret-change-me-in-production}
       CORS_ORIGINS: http://localhost:3000
-      DEFAULT_USER_EMAIL: ${DEFAULT_USER_EMAIL:-me@example.com}
-      DEFAULT_USER_PASSWORD: ${DEFAULT_USER_PASSWORD:-changeme}
+      # Dev login by default; set GOOGLE_AUTH_ENABLED=true (+ client id + allowed emails) to test Google sign-in.
+      GOOGLE_AUTH_ENABLED: ${GOOGLE_AUTH_ENABLED:-false}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      ALLOWED_EMAILS: ${ALLOWED_EMAILS:-}
+      DEV_USER_EMAIL: ${DEV_USER_EMAIL:-me@example.com}
       ENVIRONMENT: development
     ports:
       - "8000:8000"

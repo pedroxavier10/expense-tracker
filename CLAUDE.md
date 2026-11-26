@@ -69,7 +69,7 @@ endpoints (api/v1/endpoints/)  →  services (services/)  →  models (models/)
 - **`services/`** — All business logic; returns `None` on not-found (never raises)
 - **`models/`** — SQLModel ORM classes (DB table definitions)
 - **`schemas/`** — Pydantic DTOs used by endpoints and LLM tools
-- **`core/`** — Settings (`config.py`) and JWT/bcrypt security
+- **`core/`** — Settings (`config.py`), app JWT and Google ID token verification (`security.py`)
 - **`db/`** — Engine, session factory, seed data
 - **`llm/`** — Tool registry + OpenAI/Anthropic format converters (ready for chatbot)
 - **`scheduler.py`** — APScheduler background job; materializes all active recurring expense rules on day 1 of each month at 02:00 UTC
@@ -77,13 +77,14 @@ endpoints (api/v1/endpoints/)  →  services (services/)  →  models (models/)
 Key FastAPI dependencies injected everywhere:
 - `SessionDep` — yields a SQLModel `Session`
 - `CurrentUser` — extracts authenticated user from JWT
+- `SettingsDep` — injects `Settings` (override via `app.dependency_overrides[get_settings]` in tests)
 
 ### Frontend (`frontend/src/`)
 
 - **`lib/api.ts`** — Single fetch wrapper; injects Bearer token from `localStorage`; throws `ApiError` on failure
 - **`types/api.ts`** — Hand-written TypeScript mirrors of backend Pydantic schemas; keep in sync manually
 - **`hooks/`** — Data-fetching hooks (`useExpenses`, `useRecurringExpenses`, `useCategories`, …)
-- **`components/auth/`** — `AuthProvider` (context), `LoginForm`
+- **`components/auth/`** — `AuthProvider` (context), `LoginForm`, `GoogleSignInButton`
 - **`components/layout/`** — `AppShell`, `Sidebar`
 - **`components/expenses/`** — `ExpenseForm`, `ExpenseList`, `FilterBar`, `AddExpenseModal`
 - **`components/recurring/`** — `RecurringExpenseList`, `RecurringExpenseForm`, `AddRecurringExpenseModal`, `MaterializeConfirmStep`
@@ -96,7 +97,9 @@ Key FastAPI dependencies injected everywhere:
 
 ### API endpoints
 ```
-POST   /api/v1/auth/login/json        # JSON login (SPA)
+GET    /api/v1/auth/config            # public: {google_enabled, google_client_id}
+POST   /api/v1/auth/google            # {credential: <Google ID token>} -> app JWT; 403 if email not in ALLOWED_EMAILS
+POST   /api/v1/auth/dev-login         # dev only; 404 when GOOGLE_AUTH_ENABLED=true
 GET    /api/v1/auth/me
 PATCH  /api/v1/auth/me                # update current-user preferences (e.g. {"language": "pt"})
 GET    /api/v1/expenses               # filters: category_id, month, date_from, date_to, description_contains, limit, offset
@@ -145,5 +148,7 @@ The `.claude/` directory defines specialized agents and skills. Use them for:
 | Writing an Alembic migration after model changes | `migration-author` agent |
 | Adding a new LLM tool end-to-end | `llm-tool-author` agent |
 
-## Default Credentials
-- Email: `me@example.com` / Password: `changeme` (override via `.env` or `docker-compose.yml`)
+## Authentication
+No passwords. Multi-user: each Google account is an independent user; services always scope by `user_id`.
+- Dev (`GOOGLE_AUTH_ENABLED=false`): the login button signs in as `DEV_USER_EMAIL` (default `me@example.com`)
+- Prod: Google sign-in only, restricted to `ALLOWED_EMAILS`; needs `GOOGLE_CLIENT_ID`

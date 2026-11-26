@@ -2,7 +2,7 @@
 
 /**
  * Minimal auth state. Reads the token from localStorage on mount, validates it
- * by calling /auth/me, and exposes login/logout helpers.
+ * by calling /auth/me, and exposes Google/dev login and logout helpers.
  */
 
 import {
@@ -22,7 +22,8 @@ import type { User } from "@/types/api";
 interface AuthState {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: (credential: string) => Promise<void>;
+  devLogin: () => Promise<void>;
   logout: () => void;
 }
 
@@ -57,14 +58,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setLoading(false));
   }, [adoptUser]);
 
-  const login = useCallback(
-    async (email: string, password: string) => {
-      await api.login(email, password);
-      const me = await api.getMe();
-      adoptUser(me);
+  const loginWithGoogle = useCallback(
+    async (credential: string) => {
+      await api.loginWithGoogle(credential);
+      adoptUser(await api.getMe());
     },
     [adoptUser],
   );
+
+  const devLogin = useCallback(async () => {
+    await api.devLogin();
+    adoptUser(await api.getMe());
+  }, [adoptUser]);
 
   const logout = useCallback(() => {
     api.logout();
@@ -72,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, loginWithGoogle, devLogin, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -4,6 +4,9 @@ Run with: `python -m app.db.seed`
 
 Idempotent: running it multiple times will not duplicate data. Safe to
 include in container startup scripts.
+
+With Google sign-in enabled nothing is seeded — users are created on their
+first sign-in. In dev mode the dev-login user is created up front.
 """
 
 from sqlmodel import Session
@@ -13,24 +16,19 @@ from app.db.session import engine
 from app.services import user_service
 
 
-def seed_default_user(session: Session) -> None:
-    """Create the default user (with default categories) if none exists yet."""
+def seed_dev_user(session: Session) -> None:
+    """Create the dev-login user (with default categories) if dev login is on."""
     settings = get_settings()
-    existing = user_service.get_user_by_email(session, settings.default_user_email)
-    if existing:
-        print(f"Default user already exists ({settings.default_user_email}).")
+    if settings.google_auth_enabled:
+        print("Google sign-in enabled: no user to seed.")
         return
-    user_service.create_user_with_defaults(
-        session,
-        email=settings.default_user_email,
-        password=settings.default_user_password,
-    )
-    print(f"Default user created with default categories: {settings.default_user_email}")
+    user = user_service.get_or_create_dev_user(session, settings.dev_user_email)
+    print(f"Dev user ready: {user.email}")
 
 
 def main() -> None:
     with Session(engine) as session:
-        seed_default_user(session)
+        seed_dev_user(session)
     print("Seed complete.")
 
 

@@ -35,7 +35,7 @@ rewrites.
 | Backend  | FastAPI, Python 3.11+                           |
 | ORM      | **SQLModel** (SQLAlchemy 2.0 + Pydantic)        |
 | Database | PostgreSQL 16                                   |
-| Auth     | JWT (HS256) + bcrypt                            |
+| Auth     | Google sign-in (GIS ID token) + app JWT (HS256) |
 | Migrations | Alembic                                       |
 | Tests    | pytest (in-memory SQLite for speed)             |
 | Container | Docker + docker-compose                        |
@@ -88,13 +88,42 @@ Then:
 - API docs: <http://localhost:8000/docs>
 - OpenAPI: <http://localhost:8000/api/v1/openapi.json>
 
-Default login (from `docker-compose.yml`):
+In development (`GOOGLE_AUTH_ENABLED=false`, the docker-compose default), the
+"Continue with Google" button signs you straight in as `DEV_USER_EMAIL`
+(`me@example.com`) without contacting Google. **Change `SECRET_KEY` before
+deploying anywhere.**
 
-- email: `me@example.com`
-- password: `changeme`
+## Authentication
 
-To change them, set `DEFAULT_USER_EMAIL` and `DEFAULT_USER_PASSWORD` before
-running `docker compose up`. **Change `SECRET_KEY` before deploying anywhere.**
+Each Google account is a separate user with its own categories, expenses and
+recurring rules; nothing is shared between users. There are no passwords.
+
+| Variable              | Purpose                                                                 |
+| --------------------- | ----------------------------------------------------------------------- |
+| `GOOGLE_AUTH_ENABLED` | `true` = Google sign-in only. `false` = passwordless dev login.         |
+| `GOOGLE_CLIENT_ID`    | OAuth 2.0 Client ID. Required when Google sign-in is enabled.           |
+| `ALLOWED_EMAILS`      | Comma-separated emails allowed to sign in. Anyone else gets a 403.      |
+| `DEV_USER_EMAIL`      | User the dev login signs in as.                                         |
+
+Safety rails: `GOOGLE_AUTH_ENABLED` defaults to `true`, and with
+`ENVIRONMENT=production` the API refuses to start if Google sign-in is
+disabled, `GOOGLE_CLIENT_ID` is missing or `SECRET_KEY` is the default. The
+dev-login endpoint returns 404 whenever Google sign-in is enabled.
+
+### Setting up Google sign-in
+
+1. In Google Cloud Console → *APIs & Services* → *Credentials*, create an
+   **OAuth client ID** of type **Web application**.
+2. Under **Authorized JavaScript origins** add `http://localhost:3000` (to
+   test locally) and your production frontend origin. No redirect URI is
+   needed (popup flow).
+3. Set `GOOGLE_AUTH_ENABLED=true`, `GOOGLE_CLIENT_ID=<client id>` and
+   `ALLOWED_EMAILS=you@gmail.com,friend@gmail.com` on the API, then restart.
+
+On first sign-in a user is created with the default categories. If a user
+with the same email already exists (e.g. the old seeded user), it is linked to
+the Google account and keeps its data — to keep existing data, make sure
+`users.email` matches your Google email before signing in.
 
 ## Quick start without Docker
 
@@ -213,15 +242,18 @@ DELETE /api/v1/expenses/{id}             # delete
 
 GET    /api/v1/categories                # list all seeded categories
 
-POST   /api/v1/auth/login                # OAuth2 form (for Swagger UI)
-POST   /api/v1/auth/login/json           # JSON body (for SPA / mobile)
+GET    /api/v1/auth/config               # public: which login flow to show
+POST   /api/v1/auth/google               # exchange a Google ID token for an app token
+POST   /api/v1/auth/dev-login            # dev only (404 when Google sign-in is on)
 GET    /api/v1/auth/me                   # current user
 PATCH  /api/v1/auth/me                   # update user preferences (e.g. language)
 
 POST   /api/v1/chat                      # LLM chat with tool use
 ```
 
-All `/expenses` and `/categories` endpoints require `Authorization: Bearer <token>`.
+All other endpoints require `Authorization: Bearer <token>` and only ever
+return the authenticated user's own data. In Swagger UI, use *Authorize* and
+paste a token (e.g. from `/auth/dev-login`).
 
 ### Available filters on `GET /expenses`
 
@@ -241,8 +273,8 @@ All `/expenses` and `/categories` endpoints require `Authorization: Bearer <toke
 These are intentionally **not** in the project, because they'd be
 overengineering for personal use. Each has an obvious path to add later:
 
-- No public registration endpoint (default user is seeded). Add a
-  `/auth/register` endpoint when needed.
+- No self-service registration: Google sign-in is restricted to
+  `ALLOWED_EMAILS`.
 - No refresh tokens (7-day access token instead). Add when the mobile app
   arrives.
 - No budgets, savings goals, or recurring expenses. The model is generic

@@ -14,8 +14,8 @@ description: Use this skill when adding new frontend features that call the Expe
 - `src/lib/api.ts` — the API client. Single source of `fetch` calls.
   Handles auth header injection, JSON parsing, and error mapping.
 
-- `src/components/AuthProvider.tsx` — auth context with `user`, `loading`,
-  `login`, `logout`.
+- `src/components/auth/AuthProvider.tsx` — auth context with `user`, `loading`,
+  `loginWithGoogle`, `devLogin`, `logout`.
 
 - `src/lib/format.ts` — pure currency/date formatting helpers. Accept a
   locale argument; default is `pt-PT`. Prefer the locale-aware `useFormat()`

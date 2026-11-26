@@ -2,17 +2,22 @@
 
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useAuth } from "@/components/auth/AuthProvider";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import { useLocale } from "@/components/LocaleProvider";
+import { ApiError, getAuthConfig } from "@/lib/api";
+import { toIntlLocale } from "@/lib/i18n";
+import type { AuthConfig } from "@/types/api";
 
 export function LoginForm() {
-  const { login, user, loading } = useAuth();
+  const { loginWithGoogle, devLogin, user, loading } = useAuth();
+  const { locale } = useLocale();
   const router = useRouter();
   const tLogin = useTranslations("login");
   const tBrand = useTranslations("brand");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [config, setConfig] = useState<AuthConfig | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -20,19 +25,38 @@ export function LoginForm() {
     if (!loading && user) router.replace("/dashboard");
   }, [loading, user, router]);
 
-  async function onSubmit(e: FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    setError(null);
-    try {
-      await login(email, password);
-      router.push("/dashboard");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : tLogin("loginFailed"));
-    } finally {
-      setBusy(false);
-    }
-  }
+  useEffect(() => {
+    getAuthConfig()
+      .then(setConfig)
+      .catch(() => setError(tLogin("googleUnavailable")));
+  }, [tLogin]);
+
+  const signIn = useCallback(
+    async (action: () => Promise<void>) => {
+      setBusy(true);
+      setError(null);
+      try {
+        await action();
+        router.push("/dashboard");
+      } catch (err) {
+        setError(
+          err instanceof ApiError && err.status === 403
+            ? tLogin("notAllowed")
+            : tLogin("loginFailed"),
+        );
+      } finally {
+        setBusy(false);
+      }
+    },
+    [router, tLogin],
+  );
+
+  const onGoogleCredential = useCallback(
+    (credential: string) => signIn(() => loginWithGoogle(credential)),
+    [signIn, loginWithGoogle],
+  );
+
+  const onGoogleError = useCallback(() => setError(tLogin("googleUnavailable")), [tLogin]);
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6">
@@ -44,47 +68,40 @@ export function LoginForm() {
           <p className="text-ink-muted text-sm">{tBrand("loginTagline")}</p>
         </div>
 
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="label">
-              {tLogin("email")}
-            </label>
-            <input
-              id="email"
-              type="email"
-              autoComplete="email"
-              required
-              className="field"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+        <div className="space-y-4">
+          {config?.google_enabled && config.google_client_id && (
+            <GoogleSignInButton
+              clientId={config.google_client_id}
+              locale={toIntlLocale(locale)}
+              onCredential={onGoogleCredential}
+              onError={onGoogleError}
             />
-          </div>
+          )}
 
-          <div>
-            <label htmlFor="password" className="label">
-              {tLogin("password")}
-            </label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              className="field"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+          {config && !config.google_enabled && (
+            <>
+              <button
+                type="button"
+                disabled={busy}
+                className="btn-primary w-full"
+                onClick={() => signIn(devLogin)}
+              >
+                {busy ? tLogin("signingIn") : tLogin("continueWithGoogle")}
+              </button>
+              <p className="text-center text-xs text-ink-muted">{tLogin("devMode")}</p>
+            </>
+          )}
+
+          {busy && config?.google_enabled && (
+            <p className="text-center text-sm text-ink-muted">{tLogin("signingIn")}</p>
+          )}
 
           {error && (
-            <p className="text-sm text-accent" role="alert">
+            <p className="text-sm text-accent text-center" role="alert">
               {error}
             </p>
           )}
-
-          <button type="submit" disabled={busy} className="btn-primary w-full">
-            {busy ? tLogin("signingIn") : tLogin("signIn")}
-          </button>
-        </form>
+        </div>
       </div>
     </div>
   );

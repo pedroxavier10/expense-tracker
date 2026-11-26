@@ -66,7 +66,7 @@ def _get_food_category_id(session: Session, user_id):
 def _create_test_user(session: Session, email="rule_test@example.com"):
     from app.services import user_service
 
-    return user_service.create_user_with_defaults(session, email=email, password="pass123")
+    return user_service.create_user_with_defaults(session, email=email)
 
 
 def test_materialize_creates_expense(session: Session):

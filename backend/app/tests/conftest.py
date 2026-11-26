@@ -6,18 +6,28 @@ in our queries, this works without changes. Add a Postgres-backed integration
 test job to CI if you ever start using JSONB, full-text search, etc.
 """
 
-from collections.abc import Generator
+import os
 
-import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy import event
-from sqlalchemy.pool import StaticPool
-from sqlmodel import Session, SQLModel, create_engine
+# Tests must not depend on the developer's local .env auth setup. Environment
+# variables take precedence over .env, so pin dev mode before the app imports
+# its settings. Tests that need Google enabled use the `use_settings` fixture.
+os.environ["GOOGLE_AUTH_ENABLED"] = "false"
+os.environ["ENVIRONMENT"] = "test"
 
-from app.api.deps import get_session
-from app.core.security import create_access_token
-from app.main import app
-from app.services import user_service
+from collections.abc import Callable, Generator  # noqa: E402
+
+import pytest  # noqa: E402
+from fastapi.testclient import TestClient  # noqa: E402
+from sqlalchemy import event  # noqa: E402
+from sqlalchemy.pool import StaticPool  # noqa: E402
+from sqlmodel import Session, SQLModel, create_engine  # noqa: E402
+
+from app.core.config import Settings, get_settings  # noqa: E402
+from app.core.security import create_access_token  # noqa: E402
+from app.db.session import get_session  # noqa: E402
+from app.main import app  # noqa: E402
+from app.models.user import User  # noqa: E402
+from app.services import user_service  # noqa: E402
 
 
 @pytest.fixture(name="session")
@@ -49,11 +59,37 @@ def client_fixture(session: Session) -> Generator[TestClient, None, None]:
     app.dependency_overrides.clear()
 
 
+@pytest.fixture(name="use_settings")
+def use_settings_fixture(client: TestClient) -> Callable[..., Settings]:
+    """Override the settings the endpoints see, e.g. `use_settings(google_auth_enabled=True)`."""
+
+    def _use(**overrides: object) -> Settings:
+        settings = get_settings().model_copy(update=overrides)
+        app.dependency_overrides[get_settings] = lambda: settings
+        return settings
+
+    return _use
+
+
+def headers_for(user: User) -> dict[str, str]:
+    return {"Authorization": f"Bearer {create_access_token(subject=str(user.id))}"}
+
+
+@pytest.fixture(name="make_user")
+def make_user_fixture(session: Session) -> Callable[[str], tuple[User, dict[str, str]]]:
+    """Factory: create a user (with default categories) and return (user, auth headers)."""
+
+    def _make(email: str) -> tuple[User, dict[str, str]]:
+        user = user_service.create_user_with_defaults(session, email=email)
+        return user, headers_for(user)
+
+    return _make
+
+
 @pytest.fixture(name="auth_headers")
-def auth_headers_fixture(session: Session) -> dict[str, str]:
+def auth_headers_fixture(
+    make_user: Callable[[str], tuple[User, dict[str, str]]],
+) -> dict[str, str]:
     """Create a test user (with default categories) and return the auth header."""
-    user = user_service.create_user_with_defaults(
-        session, email="test@example.com", password="testpass123"
-    )
-    token = create_access_token(subject=str(user.id))
-    return {"Authorization": f"Bearer {token}"}
+    _, headers = make_user("test@example.com")
+    return headers

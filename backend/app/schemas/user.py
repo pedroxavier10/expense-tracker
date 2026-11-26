@@ -13,15 +13,8 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 Language = Literal["en", "pt"]
 
 
-class UserCreate(BaseModel):
-    """Payload for creating a new user."""
-
-    email: EmailStr
-    password: str = Field(min_length=8, max_length=128)
-
-
 class UserRead(BaseModel):
-    """Public representation of a user. Never includes the password hash."""
+    """Public representation of a user."""
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -45,8 +38,14 @@ class Token(BaseModel):
     token_type: str = "bearer"
 
 
-class LoginRequest(BaseModel):
-    """JSON login payload (alternative to OAuth2 form-data)."""
+class GoogleLoginRequest(BaseModel):
+    """Google Identity Services credential (an ID token JWT)."""
 
-    email: EmailStr
-    password: str
+    credential: str = Field(min_length=1, max_length=4096)
+
+
+class AuthConfig(BaseModel):
+    """Public auth configuration so the frontend knows which login to show."""
+
+    google_enabled: bool
+    google_client_id: str | None

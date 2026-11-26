@@ -43,11 +43,13 @@
     "retry": "Try again"
   },
   "login": {
-    "email": "Email",
-    "password": "Password",
     "signIn": "Sign in",
     "signingIn": "Signing in…",
-    "loginFailed": "Login failed"
+    "loginFailed": "Login failed",
+    "continueWithGoogle": "Continue with Google",
+    "devMode": "Development mode: signs in as the dev user without Google.",
+    "notAllowed": "This Google account is not allowed to use this app.",
+    "googleUnavailable": "Google sign-in is unavailable right now. Please try again later."
   },
   "dashboard": {
     "title": "Dashboard",

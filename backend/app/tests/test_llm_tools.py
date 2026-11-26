@@ -20,7 +20,7 @@ from app.services import category_service, user_service
 
 def _make_user_and_expenses(session: Session) -> tuple:
     user = user_service.create_user_with_defaults(
-        session, email="llm@example.com", password="pw12345678"
+        session, email="llm@example.com"
     )
     food = category_service.get_category_by_slug(session, user.id, "food")
     transport = category_service.get_category_by_slug(session, user.id, "transport")
@@ -92,7 +92,7 @@ def test_top_categories_respects_limit(session: Session) -> None:
 
 def test_open_add_expense_form_resolves_slug(session: Session) -> None:
     user = user_service.create_user_with_defaults(
-        session, email="form@example.com", password="pw12345678"
+        session, email="form@example.com"
     )
     food = category_service.get_category_by_slug(session, user.id, "food")
     assert food
@@ -115,7 +115,7 @@ def test_open_add_expense_form_resolves_slug(session: Session) -> None:
 
 
 def test_open_add_expense_form_unknown_slug_is_dropped(session: Session) -> None:
-    user = user_service.create_user(session, email="form2@example.com", password="pw12345678")
+    user = user_service.create_user(session, email="form2@example.com")
     result = open_add_expense_form(
         session,
         user.id,
