@@ -12,13 +12,20 @@ from app.schemas.category_suggestion import CategorySuggestionRead
 from app.schemas.expense import (
     AnnualSummaryResponse,
     ExpenseCreate,
+    ExpenseCreateResult,
     ExpenseFilters,
     ExpenseListResponse,
     ExpenseRead,
     ExpenseUpdate,
     MonthlySummaryResponse,
 )
-from app.services import category_service, category_suggestion_service, expense_service
+from app.schemas.recurring_suggestion import RecurringSuggestionRead
+from app.services import (
+    category_service,
+    category_suggestion_service,
+    expense_service,
+    recurring_suggestion_service,
+)
 
 router = APIRouter(prefix="/expenses", tags=["expenses"])
 
@@ -70,17 +77,21 @@ def list_expenses(
 
 @router.post(
     "",
-    response_model=ExpenseRead,
+    response_model=ExpenseCreateResult,
     status_code=status.HTTP_201_CREATED,
-    summary="Create an expense",
+    summary="Create an expense (may include a recurring-expense suggestion)",
 )
 def create_expense(
     payload: ExpenseCreate, session: SessionDep, current_user: CurrentUser
-) -> ExpenseRead:
+) -> ExpenseCreateResult:
     if not category_service.get_category(session, current_user.id, payload.category_id):
         raise HTTPException(status_code=404, detail="Category not found")
     expense = expense_service.create_expense(session, current_user.id, payload)
-    return ExpenseRead.model_validate(expense)
+    suggestion = recurring_suggestion_service.find_for_expense(session, current_user.id, expense)
+    result = ExpenseCreateResult.model_validate(expense)
+    if suggestion is not None:
+        result.recurring_suggestion = RecurringSuggestionRead.model_validate(suggestion)
+    return result
 
 
 @router.get(

@@ -22,6 +22,7 @@ import type {
   ChatStreamEvent,
   Expense,
   ExpenseCreatePayload,
+  ExpenseCreateResult,
   ExpenseFilters,
   ExpenseListResponse,
   ExpenseUpdatePayload,
@@ -32,6 +33,8 @@ import type {
   RecurringExpense,
   RecurringExpenseCreatePayload,
   RecurringExpenseUpdatePayload,
+  RecurringSuggestionAcceptPayload,
+  RecurringSuggestionAcceptResult,
   Token,
   User,
   UserUpdatePayload,
@@ -223,8 +226,8 @@ export async function listExpenses(
 
 export async function createExpense(
   payload: ExpenseCreatePayload
-): Promise<Expense> {
-  return request<Expense>("/expenses", {
+): Promise<ExpenseCreateResult> {
+  return request<ExpenseCreateResult>("/expenses", {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -297,6 +300,24 @@ export async function materializeRecurringExpenseCurrentMonth(
 ): Promise<Expense> {
   return request<Expense>(`/recurring-expenses/${id}/materialize-current-month`, {
     method: "POST",
+  });
+}
+
+// ---------- Recurring suggestions ----------
+
+export async function acceptRecurringSuggestion(
+  payload: RecurringSuggestionAcceptPayload
+): Promise<RecurringSuggestionAcceptResult> {
+  return request<RecurringSuggestionAcceptResult>("/recurring-suggestions/accept", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function dismissRecurringSuggestion(patternKey: string): Promise<void> {
+  return request<void>("/recurring-suggestions/dismiss", {
+    method: "POST",
+    body: JSON.stringify({ pattern_key: patternKey }),
   });
 }
 

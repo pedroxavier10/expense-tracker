@@ -15,8 +15,10 @@ from fastapi import HTTPException
 from pydantic import BaseModel, Field
 from sqlmodel import Session
 
+from app.llm.registry import FOLLOWUP_ACTION_KEY
 from app.schemas.expense import ExpenseCreate
-from app.services import category_service, expense_service
+from app.schemas.recurring_suggestion import RecurringSuggestionRead
+from app.services import category_service, expense_service, recurring_suggestion_service
 
 
 class AddExpenseInput(BaseModel):
@@ -43,7 +45,7 @@ def add_expense(session: Session, user_id: UUID, payload: AddExpenseInput) -> di
         category_id=payload.category_id,
     )
     expense = expense_service.create_expense(session, user_id, expense_data)
-    return {
+    result: dict = {
         "id": str(expense.id),
         "amount": str(expense.amount),
         "date": expense.expense_date.isoformat(),
@@ -51,3 +53,21 @@ def add_expense(session: Session, user_id: UUID, payload: AddExpenseInput) -> di
         "category_id": str(expense.category_id),
         "message": "Expense recorded successfully.",
     }
+
+    # Same trigger as POST /expenses: if this expense completes a monthly
+    # pattern, the app itself asks the user (in a modal) whether to make it
+    # recurring. The model only needs to know that this is being handled.
+    suggestion = recurring_suggestion_service.find_for_expense(session, user_id, expense)
+    if suggestion is not None:
+        result["recurring_suggestion_shown"] = True
+        result["message"] = (
+            "Expense recorded successfully. The app is now asking the user whether to "
+            "turn it into a recurring expense — do not ask about it yourself."
+        )
+        result[FOLLOWUP_ACTION_KEY] = {
+            "action": "suggest_recurring_expense",
+            "recurring_suggestion": RecurringSuggestionRead.model_validate(suggestion).model_dump(
+                mode="json"
+            ),
+        }
+    return result

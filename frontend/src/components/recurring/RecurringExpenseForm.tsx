@@ -9,33 +9,49 @@ import type {
   RecurringExpenseUpdatePayload,
 } from "@/types/api";
 
+/** Prefill for a new rule (e.g. from a recurring-expense suggestion). */
+export interface RecurringExpenseFormInitialValues {
+  amount?: string;
+  description?: string;
+  day_of_month?: number;
+  category_id?: string;
+}
+
 interface Props {
   categories: Category[];
   initial?: RecurringExpense;
+  initialValues?: RecurringExpenseFormInitialValues;
   onSubmit: (
     data: RecurringExpenseCreatePayload | RecurringExpenseUpdatePayload,
   ) => Promise<void>;
   onCancel?: () => void;
   submitLabel?: string;
+  cancelLabel?: string;
 }
 
 export function RecurringExpenseForm({
   categories,
   initial,
+  initialValues,
   onSubmit,
   onCancel,
   submitLabel,
+  cancelLabel,
 }: Props) {
   const t = useTranslations("recurring");
   const tForms = useTranslations("forms");
   const tCommon = useTranslations("common");
   const effectiveSubmitLabel = submitLabel ?? tCommon("save");
 
-  const [amount, setAmount] = useState(initial?.amount ?? "");
-  const [description, setDescription] = useState(initial?.description ?? "");
-  const [dayOfMonth, setDayOfMonth] = useState(initial?.day_of_month?.toString() ?? "1");
+  const [amount, setAmount] = useState(initial?.amount ?? initialValues?.amount ?? "");
+  const [description, setDescription] = useState(
+    initial?.description ?? initialValues?.description ?? "",
+  );
+  const [dayOfMonth, setDayOfMonth] = useState(
+    (initial?.day_of_month ?? initialValues?.day_of_month)?.toString() ?? "1",
+  );
   const [categoryId, setCategoryId] = useState(
-    initial?.category.id ?? categories[0]?.id ?? "",
+    initial?.category.id ?? initialValues?.category_id ?? categories[0]?.id ?? "",
   );
   const [endDate, setEndDate] = useState(initial?.end_date ?? "");
   const [isActive, setIsActive] = useState(initial?.is_active ?? true);
@@ -189,7 +205,7 @@ export function RecurringExpenseForm({
         </button>
         {onCancel && (
           <button type="button" onClick={onCancel} className="btn-ghost">
-            {tCommon("cancel")}
+            {cancelLabel ?? tCommon("cancel")}
           </button>
         )}
       </div>

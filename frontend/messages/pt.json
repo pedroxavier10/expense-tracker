@@ -95,7 +95,15 @@
     "confirmYes": "Sim, criar",
     "confirmNo": "Não por agora",
     "materializeSuccess": "Despesa de {month} criada com sucesso.",
-    "saveFailed": "Falha ao guardar"
+    "saveFailed": "Falha ao guardar",
+    "suggestion": {
+      "title": "Tornar recorrente?",
+      "body": "Registaste “{description}” em {months} meses diferentes. Queres criar uma despesa recorrente para que seja lançada automaticamente todos os meses? Ajusta os campos se for preciso.",
+      "accept": "Criar despesa recorrente",
+      "notNow": "Agora não",
+      "dismiss": "Não, não voltar a sugerir",
+      "dismissHelp": "Só volto a sugerir se continuar a repetir-se durante mais alguns meses."
+    }
   },
   "forms": {
     "amount": "Valor",

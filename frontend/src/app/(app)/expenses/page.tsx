@@ -5,6 +5,7 @@ import { useCallback, useMemo, useState } from "react";
 import { AddExpenseModal } from "@/components/expenses/AddExpenseModal";
 import { ExpenseList } from "@/components/expenses/ExpenseList";
 import { FilterBar, type FilterValues } from "@/components/expenses/FilterBar";
+import { useRecurringSuggestion } from "@/components/recurring/RecurringSuggestionProvider";
 import { useCategories } from "@/hooks/useCategories";
 import { useExpenses } from "@/hooks/useExpenses";
 import * as api from "@/lib/api";
@@ -39,15 +40,17 @@ export default function ExpensesPage() {
   const [showModal, setShowModal] = useState(false);
   const query = useMemo(() => filtersToQuery(filters), [filters]);
   const { expenses, total, loading, error, refresh } = useExpenses(query);
+  const { showRecurringSuggestion } = useRecurringSuggestion();
   const t = useTranslations("expenses");
   const tCommon = useTranslations("common");
 
   const handleCreate = useCallback(
     async (data: ExpenseCreatePayload | ExpenseUpdatePayload) => {
-      await api.createExpense(data as ExpenseCreatePayload);
+      const created = await api.createExpense(data as ExpenseCreatePayload);
       await refresh();
+      showRecurringSuggestion(created.recurring_suggestion);
     },
-    [refresh]
+    [refresh, showRecurringSuggestion]
   );
 
   const handleUpdate = useCallback(

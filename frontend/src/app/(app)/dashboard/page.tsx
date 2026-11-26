@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { AddExpenseModal } from "@/components/expenses/AddExpenseModal";
+import { useRecurringSuggestion } from "@/components/recurring/RecurringSuggestionProvider";
 import { SummaryCard } from "@/components/reports/SummaryCard";
 import { useLocale } from "@/components/LocaleProvider";
 import { useCategories } from "@/hooks/useCategories";
@@ -18,6 +19,7 @@ export default function DashboardPage() {
   const { categories } = useCategories();
   const query = useMemo(() => ({ month: currentMonthIso(), limit: 500 }), []);
   const { expenses, loading, refresh } = useExpenses(query);
+  const { showRecurringSuggestion } = useRecurringSuggestion();
   const [showModal, setShowModal] = useState(false);
   const t = useTranslations("dashboard");
   const tCommon = useTranslations("common");
@@ -44,10 +46,11 @@ export default function DashboardPage() {
 
   const handleCreate = useCallback(
     async (data: ExpenseCreatePayload | ExpenseUpdatePayload) => {
-      await api.createExpense(data as ExpenseCreatePayload);
+      const created = await api.createExpense(data as ExpenseCreatePayload);
       await refresh();
+      showRecurringSuggestion(created.recurring_suggestion);
     },
-    [refresh]
+    [refresh, showRecurringSuggestion]
   );
 
   const now = new Date();

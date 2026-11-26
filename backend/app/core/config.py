@@ -70,6 +70,11 @@ class Settings(BaseSettings):
     llm_temperature: float = 0.2
     llm_max_tool_iterations: int = 6  # safety limit on the tool-calling loop
 
+    # --- Recurring-expense suggestions ---
+    # Distinct months an expense (same description, category and ~amount) must
+    # appear in before the app suggests turning it into a recurring rule.
+    recurring_suggestion_min_months: int = Field(default=3, ge=2, le=12)
+
     @model_validator(mode="after")
     def _check_production_safety(self) -> Self:
         if self.google_auth_enabled and not self.google_client_id:
