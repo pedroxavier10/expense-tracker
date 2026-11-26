@@ -278,6 +278,13 @@
       "csv_too_large": "The file is larger than 2 MB.",
       "duplicates_confirmation_required": "There are duplicate expenses: please confirm the import.",
       "generic": "Something went wrong. Please try again."
+    },
+    "recurringSuggestions": {
+      "title": "These expenses repeat every month",
+      "subtitle": "Turn them into recurring expenses so they are added automatically. The expenses you already have are linked to the new rule.",
+      "meta": "{months} months · usually on day {day}",
+      "create": "Make recurring",
+      "ignore": "Ignore"
     }
   }
 }

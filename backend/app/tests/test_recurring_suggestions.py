@@ -4,6 +4,7 @@ from collections.abc import Callable
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, select
 
@@ -471,3 +472,86 @@ def test_add_expense_tool_without_pattern_has_no_followup(
         ),
     )
     assert _split_followup_action(result) == (result, None)
+
+
+# ---------------------------------------------------------------------------
+# CSV import
+# ---------------------------------------------------------------------------
+
+IMPORT = "/api/v1/import-export/import"
+
+
+def _import(client: TestClient, headers: dict[str, str], *rows: str) -> dict:
+    text = "date;description;amount;category\n" + "\n".join(rows) + "\n"
+    response = client.post(
+        IMPORT,
+        files={"file": ("expenses.csv", text.encode("utf-8"), "text/csv")},
+        data={"default_month": datetime.now(UTC).strftime("%Y-%m")},
+        headers=headers,
+    )
+    assert response.status_code == 201, response.text
+    return response.json()
+
+
+def _row(day: date, description: str = "Ginásio", amount: str = "35,00") -> str:
+    return f"{day.isoformat()};{description};{amount};Leisure"
+
+
+def test_import_returns_suggestions_for_completed_patterns(
+    client: TestClient, make_user: MakeUser
+) -> None:
+    _, headers = make_user("csvsuggest@example.com")
+    today = datetime.now(UTC).date()
+
+    body = _import(
+        client,
+        headers,
+        *[_row(_months_ago(n, today=today)) for n in (2, 1, 0)],
+        *[_row(_months_ago(n, today=today), "Netflix", "13,99") for n in (2, 1, 0)],
+        _row(_months_ago(0, today=today), "Cinema", "8,00"),
+    )
+
+    suggestions = body["recurring_suggestions"]
+    assert sorted(s["description"] for s in suggestions) == ["Ginásio", "Netflix"]
+    assert all(s["months"] == 3 for s in suggestions)
+
+
+def test_import_completes_pattern_started_in_the_app(
+    client: TestClient, session: Session, make_user: MakeUser
+) -> None:
+    user, headers = make_user("csvcomplete@example.com")
+    today = datetime.now(UTC).date()
+    for n in (2, 1):
+        _expense(session, user, _months_ago(n, today=today))
+
+    body = _import(client, headers, _row(_months_ago(0, today=today)))
+
+    [suggestion] = body["recurring_suggestions"]
+    assert suggestion["months"] == 3
+    assert len(suggestion["expense_ids"]) == 3
+
+
+def test_import_of_old_history_suggests_nothing(client: TestClient, make_user: MakeUser) -> None:
+    _, headers = make_user("csvold@example.com")
+    today = datetime.now(UTC).date()
+
+    body = _import(client, headers, *[_row(_months_ago(n, today=today)) for n in (8, 7, 6, 5)])
+
+    assert body["recurring_suggestions"] == []
+
+
+def test_import_suggestions_are_capped(
+    client: TestClient, make_user: MakeUser, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(service, "MAX_BULK_SUGGESTIONS", 1)
+    _, headers = make_user("csvcap@example.com")
+    today = datetime.now(UTC).date()
+
+    body = _import(
+        client,
+        headers,
+        *[_row(_months_ago(n, today=today), "Ginásio") for n in (2, 1, 0)],
+        *[_row(_months_ago(n, today=today), "Netflix", "13,99") for n in (2, 1, 0)],
+    )
+
+    assert len(body["recurring_suggestions"]) == 1

@@ -37,7 +37,8 @@ from app.schemas.import_export import (
     ImportRowError,
     RowErrorCode,
 )
-from app.services import slug_service
+from app.schemas.recurring_suggestion import RecurringSuggestionRead
+from app.services import recurring_suggestion_service, slug_service
 from app.services.category_suggestion_service import CategorySuggester
 from app.services.text_normalization import fold_text
 
@@ -411,20 +412,24 @@ async def run_import(
             session.add(category)
 
         imported = skipped = 0
+        touched_patterns: set[str] = set()
         for planned in plan.rows:
             if planned.is_duplicate and duplicate_mode == "skip":
                 skipped += 1
                 continue
             category = planned.category or created[planned.new_category_key or ""]
+            description = planned.row.description or category.name
             session.add(
                 Expense(
                     user_id=user.id,
                     category_id=category.id,
                     amount=planned.row.amount,
                     expense_date=planned.row.expense_date,
-                    description=planned.row.description or category.name,
+                    description=description,
                 )
             )
+            if key := recurring_suggestion_service.pattern_key(category.id, description):
+                touched_patterns.add(key)
             imported += 1
         session.commit()
     except Exception:
@@ -433,11 +438,15 @@ async def run_import(
 
     for category in created.values():
         session.refresh(category)
+    # Patterns this file completed (or extended) that now look monthly. One
+    # summary list instead of a modal per row; the user answers each in the UI.
+    suggestions = recurring_suggestion_service.find_for_keys(session, user.id, touched_patterns)
     return ImportResult(
         imported=imported,
         skipped_duplicates=skipped,
         skipped_invalid=len(parsed.errors),
         created_categories=[CategoryRead.model_validate(c) for c in created.values()],
+        recurring_suggestions=[RecurringSuggestionRead.model_validate(s) for s in suggestions],
     )
 
 

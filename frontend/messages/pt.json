@@ -278,6 +278,13 @@
       "csv_too_large": "O ficheiro tem mais de 2 MB.",
       "duplicates_confirmation_required": "Há despesas duplicadas: confirma a importação.",
       "generic": "Ocorreu um erro. Tenta novamente."
+    },
+    "recurringSuggestions": {
+      "title": "Estas despesas repetem-se todos os meses",
+      "subtitle": "Torna-as recorrentes para serem lançadas automaticamente. As despesas que já tens ficam associadas à nova regra.",
+      "meta": "{months} meses · normalmente no dia {day}",
+      "create": "Tornar recorrente",
+      "ignore": "Ignorar"
     }
   }
 }

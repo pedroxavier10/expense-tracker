@@ -14,6 +14,7 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -23,9 +24,17 @@ import { useCategories } from "@/hooks/useCategories";
 import { EXPENSE_CREATED_EVENT } from "@/lib/events";
 import type { RecurringSuggestion } from "@/types/api";
 
+export type RecurringSuggestionOutcome = "accepted" | "dismissed" | "closed";
+
 interface RecurringSuggestionState {
-  /** No-op for `null`/`undefined`, so callers can pass the API field directly. */
-  showRecurringSuggestion: (suggestion: RecurringSuggestion | null | undefined) => void;
+  /**
+   * No-op for `null`/`undefined`, so callers can pass the API field directly.
+   * `onResolved` reports how the modal ended ("closed" = "Not now").
+   */
+  showRecurringSuggestion: (
+    suggestion: RecurringSuggestion | null | undefined,
+    onResolved?: (outcome: RecurringSuggestionOutcome) => void,
+  ) => void;
 }
 
 const RecurringSuggestionContext = createContext<RecurringSuggestionState | null>(null);
@@ -33,10 +42,19 @@ const RecurringSuggestionContext = createContext<RecurringSuggestionState | null
 export function RecurringSuggestionProvider({ children }: { children: ReactNode }) {
   const { categories, refetch: refetchCategories } = useCategories();
   const [suggestion, setSuggestion] = useState<RecurringSuggestion | null>(null);
+  const outcomeRef = useRef<RecurringSuggestionOutcome>("closed");
+  const onResolvedRef = useRef<((outcome: RecurringSuggestionOutcome) => void) | undefined>(
+    undefined,
+  );
 
   const showRecurringSuggestion = useCallback(
-    (value: RecurringSuggestion | null | undefined) => {
+    (
+      value: RecurringSuggestion | null | undefined,
+      onResolved?: (outcome: RecurringSuggestionOutcome) => void,
+    ) => {
       if (!value) return;
+      outcomeRef.current = "closed";
+      onResolvedRef.current = onResolved;
       setSuggestion(value);
       void refetchCategories();
     },
@@ -52,8 +70,19 @@ export function RecurringSuggestionProvider({ children }: { children: ReactNode 
   }, [categories, suggestion]);
 
   const handleAccepted = useCallback(() => {
+    outcomeRef.current = "accepted";
     // Linked expenses now carry the recurring badge: let lists refresh.
     window.dispatchEvent(new CustomEvent(EXPENSE_CREATED_EVENT));
+  }, []);
+
+  const handleDismissed = useCallback(() => {
+    outcomeRef.current = "dismissed";
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setSuggestion(null);
+    onResolvedRef.current?.(outcomeRef.current);
+    onResolvedRef.current = undefined;
   }, []);
 
   const value = useMemo(() => ({ showRecurringSuggestion }), [showRecurringSuggestion]);
@@ -67,7 +96,8 @@ export function RecurringSuggestionProvider({ children }: { children: ReactNode 
           suggestion={suggestion}
           categories={options}
           onAccepted={handleAccepted}
-          onClose={() => setSuggestion(null)}
+          onDismissed={handleDismissed}
+          onClose={handleClose}
         />
       )}
     </RecurringSuggestionContext.Provider>

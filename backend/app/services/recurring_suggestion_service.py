@@ -18,6 +18,7 @@ Suggestions are computed on demand (cheap at personal scale); only dismissals
 are stored.
 """
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from decimal import Decimal
@@ -37,6 +38,8 @@ from app.services.text_normalization import description_key
 
 LOOKBACK_MONTHS = 12
 AMOUNT_TOLERANCE = Decimal("0.05")
+# Cap for bulk detection (CSV import): a historical file can touch many patterns.
+MAX_BULK_SUGGESTIONS = 20
 
 
 @dataclass(frozen=True)
@@ -215,6 +218,21 @@ def find_for_expense(
     if suggestion is None or all(e.id != expense.id for e in suggestion.expenses):
         return None
     return suggestion
+
+
+def find_for_keys(
+    session: Session, user_id: UUID, keys: Iterable[str], today: date | None = None
+) -> list[RecurringSuggestion]:
+    """Suggestions among the given pattern keys (e.g. those touched by a CSV
+    import), most months first, capped at `MAX_BULK_SUGGESTIONS`."""
+    today = today or datetime.now(UTC).date()
+    found = [
+        suggestion
+        for key in sorted(set(keys))
+        if (suggestion := find_by_key(session, user_id, key, today)) is not None
+    ]
+    found.sort(key=lambda s: (-s.months, s.description.casefold()))
+    return found[:MAX_BULK_SUGGESTIONS]
 
 
 # ---------------------------------------------------------------------------

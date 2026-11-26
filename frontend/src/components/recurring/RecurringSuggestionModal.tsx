@@ -18,6 +18,8 @@ interface Props {
   categories: Category[];
   /** A rule was created and past expenses were linked to it. */
   onAccepted: () => void;
+  /** The user answered "No": the suggestion was dismissed server-side. */
+  onDismissed?: () => void;
   onClose: () => void;
 }
 
@@ -32,7 +34,13 @@ type Step = "suggest" | "confirm-materialize";
  * - No → the suggestion is dismissed; the count starts again from zero.
  * - Not now → just closes; it is suggested again on the next occurrence.
  */
-export function RecurringSuggestionModal({ suggestion, categories, onAccepted, onClose }: Props) {
+export function RecurringSuggestionModal({
+  suggestion,
+  categories,
+  onAccepted,
+  onDismissed,
+  onClose,
+}: Props) {
   const t = useTranslations("recurring.suggestion");
   const tRecurring = useTranslations("recurring");
   const tCommon = useTranslations("common");
@@ -74,6 +82,7 @@ export function RecurringSuggestionModal({ suggestion, categories, onAccepted, o
     setError(null);
     try {
       await api.dismissRecurringSuggestion(suggestion.pattern_key);
+      onDismissed?.();
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : tRecurring("saveFailed"));

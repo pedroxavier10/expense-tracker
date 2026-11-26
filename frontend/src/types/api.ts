@@ -255,6 +255,8 @@ export interface ImportResult {
   skipped_duplicates: number;
   skipped_invalid: number;
   created_categories: Category[];
+  /** Imported expenses that now repeat monthly (capped server-side). */
+  recurring_suggestions: RecurringSuggestion[];
 }
 
 export interface ImportOptions {
