@@ -95,7 +95,15 @@
     "confirmYes": "Yes, create it",
     "confirmNo": "Skip for now",
     "materializeSuccess": "Expense for {month} created successfully.",
-    "saveFailed": "Save failed"
+    "saveFailed": "Save failed",
+    "suggestion": {
+      "title": "Make it recurring?",
+      "body": "You registered “{description}” in {months} different months. Create a recurring expense so it is added automatically every month? Adjust the fields if needed.",
+      "accept": "Create recurring expense",
+      "notNow": "Not now",
+      "dismiss": "No, don't suggest this again",
+      "dismissHelp": "It will only be suggested again if it keeps repeating for a few more months."
+    }
   },
   "forms": {
     "amount": "Amount",
@@ -270,6 +278,13 @@
       "csv_too_large": "The file is larger than 2 MB.",
       "duplicates_confirmation_required": "There are duplicate expenses: please confirm the import.",
       "generic": "Something went wrong. Please try again."
+    },
+    "recurringSuggestions": {
+      "title": "These expenses repeat every month",
+      "subtitle": "Turn them into recurring expenses so they are added automatically. The expenses you already have are linked to the new rule.",
+      "meta": "{months} months · usually on day {day}",
+      "create": "Make recurring",
+      "ignore": "Ignore"
     }
   }
 }

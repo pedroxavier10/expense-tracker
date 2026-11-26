@@ -10,6 +10,7 @@ import { currentMonthIso } from "@/lib/format";
 import type { DuplicateMode, ImportPreview, ImportResult } from "@/types/api";
 
 import { ImportPreviewPanel } from "./ImportPreviewPanel";
+import { ImportRecurringSuggestions } from "./ImportRecurringSuggestions";
 import { useImportExportError } from "./useImportExportError";
 
 export function ImportCard() {
@@ -143,6 +144,9 @@ export function ImportCard() {
                 names: result.created_categories.map((c) => c.name).join(", "),
               })}
             </p>
+          )}
+          {result.recurring_suggestions.length > 0 && (
+            <ImportRecurringSuggestions suggestions={result.recurring_suggestions} />
           )}
           <div className="flex flex-wrap gap-2 pt-2">
             <Link href="/expenses" className="btn-primary">

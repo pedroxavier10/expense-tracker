@@ -21,8 +21,9 @@ import {
 } from "react";
 
 import { useChatActions, EXPENSE_CREATED_EVENT } from "@/components/chat/ChatActionsProvider";
+import { useRecurringSuggestion } from "@/components/recurring/RecurringSuggestionProvider";
 import * as api from "@/lib/api";
-import type { ChatMessage, ChatStreamEvent } from "@/types/api";
+import type { ChatMessage, ChatStreamEvent, RecurringSuggestion } from "@/types/api";
 import type { ExpenseFormInitialValues } from "@/components/expenses/ExpenseForm";
 
 interface Props {
@@ -45,6 +46,7 @@ function isExpenseFormInitialValues(
 
 export function ChatPanel({ variant }: Props) {
   const { openAddExpense } = useChatActions();
+  const { showRecurringSuggestion } = useRecurringSuggestion();
   const t = useTranslations("chat");
   const greeting = useMemo<ChatMessage>(
     () => ({ role: "assistant", content: t("greeting") }),
@@ -109,6 +111,11 @@ export function ChatPanel({ variant }: Props) {
         } else if (event.type === "client_action") {
           if (event.action === "open_add_expense_form") {
             openAddExpense(isExpenseFormInitialValues(event.payload.prefill as Record<string, unknown> ?? {}));
+          } else if (event.action === "suggest_recurring_expense") {
+            // Emitted by add_expense alongside the model's reply (the turn goes on).
+            showRecurringSuggestion(
+              event.payload.recurring_suggestion as RecurringSuggestion | undefined,
+            );
           }
         } else if (event.type === "error") {
           setError(event.message);
@@ -134,7 +141,7 @@ export function ChatPanel({ variant }: Props) {
         });
       }
     },
-    [busy, messages, openAddExpense, t],
+    [busy, messages, openAddExpense, showRecurringSuggestion, t],
   );
 
   const handleSubmit = (e: FormEvent) => {

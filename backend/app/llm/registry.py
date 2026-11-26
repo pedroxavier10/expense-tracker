@@ -14,6 +14,12 @@ from typing import Any
 
 from pydantic import BaseModel
 
+# Result key for a UI action that should run *alongside* the conversation (the
+# model keeps answering), unlike a top-level `"action"` key, which hands control
+# back to the user and ends the turn. The chat loop strips it from the result
+# the model sees and forwards it to the client as a `client_action` event.
+FOLLOWUP_ACTION_KEY = "followup_action"
+
 
 @dataclass
 class Tool:

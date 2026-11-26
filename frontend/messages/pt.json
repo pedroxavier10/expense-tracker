@@ -95,7 +95,15 @@
     "confirmYes": "Sim, criar",
     "confirmNo": "Não por agora",
     "materializeSuccess": "Despesa de {month} criada com sucesso.",
-    "saveFailed": "Falha ao guardar"
+    "saveFailed": "Falha ao guardar",
+    "suggestion": {
+      "title": "Tornar recorrente?",
+      "body": "Registaste “{description}” em {months} meses diferentes. Queres criar uma despesa recorrente para que seja lançada automaticamente todos os meses? Ajusta os campos se for preciso.",
+      "accept": "Criar despesa recorrente",
+      "notNow": "Agora não",
+      "dismiss": "Não, não voltar a sugerir",
+      "dismissHelp": "Só volto a sugerir se continuar a repetir-se durante mais alguns meses."
+    }
   },
   "forms": {
     "amount": "Valor",
@@ -270,6 +278,13 @@
       "csv_too_large": "O ficheiro tem mais de 2 MB.",
       "duplicates_confirmation_required": "Há despesas duplicadas: confirma a importação.",
       "generic": "Ocorreu um erro. Tenta novamente."
+    },
+    "recurringSuggestions": {
+      "title": "Estas despesas repetem-se todos os meses",
+      "subtitle": "Torna-as recorrentes para serem lançadas automaticamente. As despesas que já tens ficam associadas à nova regra.",
+      "meta": "{months} meses · normalmente no dia {day}",
+      "create": "Tornar recorrente",
+      "ignore": "Ignorar"
     }
   }
 }

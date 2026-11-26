@@ -10,6 +10,7 @@ from typing import Literal
 from pydantic import BaseModel
 
 from app.schemas.category import CategoryRead
+from app.schemas.recurring_suggestion import RecurringSuggestionRead
 
 DuplicateMode = Literal["import", "skip"]
 
@@ -60,3 +61,5 @@ class ImportResult(BaseModel):
     skipped_duplicates: int
     skipped_invalid: int
     created_categories: list[CategoryRead]
+    # Imported expenses that now repeat monthly: candidates for recurring rules.
+    recurring_suggestions: list[RecurringSuggestionRead] = []

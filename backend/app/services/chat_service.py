@@ -14,6 +14,7 @@ from sqlmodel import Session
 
 from app.core.config import get_settings
 from app.llm.client import get_llm_client
+from app.llm.registry import FOLLOWUP_ACTION_KEY
 from app.llm.tools import REGISTRY
 from app.models.category import Category
 from app.models.category_hint import CategoryHint
@@ -152,6 +153,20 @@ async def _run_tool(
     return result, client_action
 
 
+def _split_followup_action(result: dict) -> tuple[dict, dict | None]:
+    """Separate a tool's follow-up UI action (see `FOLLOWUP_ACTION_KEY`) from
+    the result the model sees. Returns (result_for_model, client_action)."""
+    if not isinstance(result, dict) or FOLLOWUP_ACTION_KEY not in result:
+        return result, None
+    followup = result[FOLLOWUP_ACTION_KEY]
+    for_model = {k: v for k, v in result.items() if k != FOLLOWUP_ACTION_KEY}
+    client_action = {
+        "action": followup["action"],
+        "payload": {k: v for k, v in followup.items() if k != "action"},
+    }
+    return for_model, client_action
+
+
 async def stream_chat(
     session: Session,
     user_id: UUID,
@@ -261,9 +276,13 @@ async def stream_chat(
                 yield _sse({"type": "tool_use", "name": name, "args": args_preview})
 
                 result, client_action = await _run_tool(session, user_id, name, tc["arguments"])
+                result, followup_action = _split_followup_action(result)
                 ok = isinstance(result, dict) and "error" not in result
                 logger.info("Tool %r → %s | result: %s", name, "OK" if ok else "ERROR", result)
                 yield _sse({"type": "tool_result", "name": name, "ok": ok})
+                if followup_action is not None:
+                    # Does not end the turn: the model still confirms in text.
+                    yield _sse({"type": "client_action", **followup_action})
                 if client_action is not None:
                     yield _sse({"type": "client_action", **client_action})
                     dispatched_client_action = True

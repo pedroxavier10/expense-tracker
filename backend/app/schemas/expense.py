@@ -13,6 +13,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.schemas.category import CategoryRead
+from app.schemas.recurring_suggestion import RecurringSuggestionRead
 
 
 class ExpenseBase(BaseModel):
@@ -51,6 +52,13 @@ class ExpenseRead(BaseModel):
     recurring_expense_id: UUID | None
     created_at: datetime
     updated_at: datetime
+
+
+class ExpenseCreateResult(ExpenseRead):
+    """Response of POST /expenses: the expense plus, when this expense completes
+    a monthly pattern, a suggestion to turn it into a recurring rule."""
+
+    recurring_suggestion: RecurringSuggestionRead | None = None
 
 
 class ExpenseFilters(BaseModel):

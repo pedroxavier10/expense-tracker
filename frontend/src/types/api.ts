@@ -87,6 +87,35 @@ export interface RecurringExpenseCreatePayload {
 
 export type RecurringExpenseUpdatePayload = Partial<RecurringExpenseCreatePayload>;
 
+/** Mirrors backend `RecurringSuggestionRead`: an expense repeated every month. */
+export interface RecurringSuggestion {
+  pattern_key: string;
+  description: string;
+  amount: string; // Decimal as string
+  category: Category;
+  day_of_month: number;
+  /** Distinct months the expense was registered in. */
+  months: number;
+  expense_ids: string[];
+}
+
+/** Response of POST /expenses. */
+export interface ExpenseCreateResult extends Expense {
+  recurring_suggestion: RecurringSuggestion | null;
+}
+
+export interface RecurringSuggestionAcceptPayload {
+  pattern_key: string;
+  rule: RecurringExpenseCreatePayload;
+}
+
+export interface RecurringSuggestionAcceptResult {
+  rule: RecurringExpense;
+  linked_expenses: number;
+  /** The current month is already registered: do not offer to materialize it. */
+  current_month_covered: boolean;
+}
+
 export interface ExpenseListResponse {
   items: Expense[];
   total: number;
@@ -226,6 +255,8 @@ export interface ImportResult {
   skipped_duplicates: number;
   skipped_invalid: number;
   created_categories: Category[];
+  /** Imported expenses that now repeat monthly (capped server-side). */
+  recurring_suggestions: RecurringSuggestion[];
 }
 
 export interface ImportOptions {

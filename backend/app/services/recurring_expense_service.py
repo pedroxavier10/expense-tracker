@@ -31,8 +31,10 @@ def list_recurring_expenses(session: Session, user_id: UUID) -> list[RecurringEx
 
 
 def create_recurring_expense(
-    session: Session, user_id: UUID, data: RecurringExpenseCreate
+    session: Session, user_id: UUID, data: RecurringExpenseCreate, *, commit: bool = True
 ) -> RecurringExpense:
+    """Create a rule. With `commit=False` it is only flushed (id assigned), so a
+    caller can do more work in the same transaction and commit once."""
     rule = RecurringExpense(
         user_id=user_id,
         category_id=data.category_id,
@@ -43,6 +45,9 @@ def create_recurring_expense(
         end_date=data.end_date,
     )
     session.add(rule)
+    if not commit:
+        session.flush()
+        return rule
     session.commit()
     session.refresh(rule)
     return rule
