@@ -5,9 +5,12 @@ are loaded from environment variables or a `.env` file at the project root.
 """
 
 from functools import lru_cache
+from typing import Self
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+INSECURE_DEFAULT_SECRET_KEY = "insecure-development-key-change-me"
 
 
 class Settings(BaseSettings):
@@ -36,16 +39,22 @@ class Settings(BaseSettings):
     )
 
     # Security
-    secret_key: str = Field(default="insecure-development-key-change-me")
+    secret_key: str = Field(default=INSECURE_DEFAULT_SECRET_KEY)
     access_token_expire_minutes: int = 60 * 24 * 7  # 7 days
     algorithm: str = "HS256"
 
     # CORS
     cors_origins: str = "http://localhost:3000"
 
-    # Default user (bootstrapped on first run for single-user personal use)
-    default_user_email: str = "me@example.com"
-    default_user_password: str = "changeme"
+    # Authentication
+    # Google sign-in is the only login method in production. Defaults to on so a
+    # forgotten variable can never expose the passwordless dev login.
+    google_auth_enabled: bool = True
+    google_client_id: str | None = None
+    # Comma-separated list of emails allowed to sign in with Google. Empty = nobody.
+    allowed_emails: str = ""
+    # User the dev login signs in as when google_auth_enabled is false.
+    dev_user_email: str = "me@example.com"
 
     # LLM
     # Defaults target a local Ollama daemon (OpenAI-compatible API).
@@ -60,6 +69,22 @@ class Settings(BaseSettings):
     llm_utility_model: str | None = None
     llm_temperature: float = 0.2
     llm_max_tool_iterations: int = 6  # safety limit on the tool-calling loop
+
+    @model_validator(mode="after")
+    def _check_production_safety(self) -> Self:
+        if self.google_auth_enabled and not self.google_client_id:
+            raise ValueError("GOOGLE_CLIENT_ID is required when GOOGLE_AUTH_ENABLED is true")
+        if self.environment.lower() == "production":
+            if not self.google_auth_enabled:
+                raise ValueError("GOOGLE_AUTH_ENABLED must be true in production")
+            if self.secret_key == INSECURE_DEFAULT_SECRET_KEY:
+                raise ValueError("SECRET_KEY must be set in production")
+        return self
+
+    @property
+    def allowed_emails_set(self) -> set[str]:
+        """Parse comma-separated allowed emails into a lowercase set."""
+        return {e.strip().lower() for e in self.allowed_emails.split(",") if e.strip()}
 
     @property
     def cors_origins_list(self) -> list[str]:

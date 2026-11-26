@@ -71,7 +71,15 @@ output. Same object, same validation, same query.
 - 7 days because this is a personal app on a single device most of the time
   and constant logins are annoying. For multi-device use, switch to ~15
   minutes + refresh tokens (see `docs/MOBILE_EVOLUTION.md`).
-- Bcrypt for password hashing.
+- No passwords: users sign in with Google. The frontend gets a Google ID
+  token from Google Identity Services, the API verifies it (signature, `aud`,
+  `iss`, `exp`, `email_verified`) and issues its own JWT, so the rest of the
+  API is provider-agnostic. Access is limited to `ALLOWED_EMAILS`.
+- A passwordless dev login exists only when `GOOGLE_AUTH_ENABLED=false`; the
+  API refuses to start that way with `ENVIRONMENT=production`.
+- Users are isolated: every service function takes the caller's `user_id`
+  and returns `None` (→ 404) for other users' rows. Covered by
+  `app/tests/test_user_isolation.py`.
 - The token is stored in `localStorage` on the web — acceptable for a
   personal app, but on a multi-user product, prefer `httpOnly` cookies with
   SameSite=Lax to mitigate XSS.

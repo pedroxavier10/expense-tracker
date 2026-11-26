@@ -43,11 +43,13 @@
     "retry": "Tentar de novo"
   },
   "login": {
-    "email": "Email",
-    "password": "Palavra-passe",
     "signIn": "Entrar",
     "signingIn": "A entrar…",
-    "loginFailed": "Falha ao iniciar sessão"
+    "loginFailed": "Falha ao iniciar sessão",
+    "continueWithGoogle": "Continuar com o Google",
+    "devMode": "Modo de desenvolvimento: entra como utilizador de dev sem passar pelo Google.",
+    "notAllowed": "Esta conta Google não tem acesso a esta aplicação.",
+    "googleUnavailable": "O início de sessão com o Google não está disponível de momento. Tente novamente mais tarde."
   },
   "dashboard": {
     "title": "Painel",

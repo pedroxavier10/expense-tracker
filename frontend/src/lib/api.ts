@@ -10,6 +10,7 @@
 
 import type {
   AnnualSummaryResponse,
+  AuthConfig,
   Category,
   CategoryCreatePayload,
   CategoryDeleteResult,
@@ -102,10 +103,25 @@ async function request<T>(
 
 // ---------- Auth ----------
 
-export async function login(email: string, password: string): Promise<Token> {
-  const token = await request<Token>("/auth/login/json", {
+export async function getAuthConfig(): Promise<AuthConfig> {
+  return request<AuthConfig>("/auth/config", { skipAuth: true });
+}
+
+/** Exchange a Google Identity Services credential (ID token) for an app token. */
+export async function loginWithGoogle(credential: string): Promise<Token> {
+  const token = await request<Token>("/auth/google", {
     method: "POST",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ credential }),
+    skipAuth: true,
+  });
+  setToken(token.access_token);
+  return token;
+}
+
+/** Passwordless dev login. The backend only allows it when Google sign-in is disabled. */
+export async function devLogin(): Promise<Token> {
+  const token = await request<Token>("/auth/dev-login", {
+    method: "POST",
     skipAuth: true,
   });
   setToken(token.access_token);

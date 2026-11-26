@@ -31,7 +31,7 @@ def _slugs(client: TestClient, headers: dict[str, str], include_inactive: bool =
 
 def _second_user_headers(session: Session) -> dict[str, str]:
     user = user_service.create_user_with_defaults(
-        session, email="other@example.com", password="pw12345678"
+        session, email="other@example.com"
     )
     return {"Authorization": f"Bearer {create_access_token(subject=str(user.id))}"}
 

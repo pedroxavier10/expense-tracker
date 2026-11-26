@@ -130,7 +130,7 @@ def test_user_isolation(
     from app.core.security import create_access_token
     from app.services import user_service
 
-    other_user = user_service.create_user(session, email="other2@example.com", password="pass")
+    other_user = user_service.create_user(session, email="other2@example.com")
     other_token = create_access_token(subject=str(other_user.id))
     other_headers = {"Authorization": f"Bearer {other_token}"}
 

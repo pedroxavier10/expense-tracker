@@ -108,6 +108,11 @@ export interface Token {
   token_type: string;
 }
 
+export interface AuthConfig {
+  google_enabled: boolean;
+  google_client_id: string | null;
+}
+
 // ---------- Reports / summary ----------
 
 export interface CategorySummary {

@@ -1,48 +1,56 @@
-"""Authentication endpoints: login and self-info.
+"""Authentication endpoints: Google sign-in, dev login and self-info.
 
-Single-user personal app: we deliberately don't expose a public /register
-endpoint. The default user is created during the seed step. Add registration
-later if you ever open this up to other users.
+Production only accepts Google sign-in, restricted to `ALLOWED_EMAILS`. When
+`GOOGLE_AUTH_ENABLED=false` (development only — refused at startup in
+production) a passwordless dev login signs in as `DEV_USER_EMAIL`.
 """
 
-from typing import Annotated
+from fastapi import APIRouter, HTTPException, status
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
-
-from app.api.deps import CurrentUser, SessionDep
-from app.core.security import create_access_token
-from app.schemas.user import LoginRequest, Token, UserRead, UserUpdate
+from app.api.deps import CurrentUser, SessionDep, SettingsDep
+from app.core.security import create_access_token, verify_google_id_token
+from app.schemas.user import AuthConfig, GoogleLoginRequest, Token, UserRead, UserUpdate
 from app.services import user_service
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/login", response_model=Token, summary="Log in (OAuth2 form)")
-def login_oauth2(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    session: SessionDep,
-) -> Token:
-    """OAuth2-compatible login. The Swagger UI 'Authorize' button uses this."""
-    user = user_service.authenticate(session, form_data.username, form_data.password)
-    if not user:
+@router.get("/config", response_model=AuthConfig, summary="Public auth configuration")
+def read_auth_config(settings: SettingsDep) -> AuthConfig:
+    """Tell the client which login flow to show. The client id is not a secret."""
+    return AuthConfig(
+        google_enabled=settings.google_auth_enabled,
+        google_client_id=settings.google_client_id if settings.google_auth_enabled else None,
+    )
+
+
+@router.post("/google", response_model=Token, summary="Sign in with a Google ID token")
+def login_google(payload: GoogleLoginRequest, session: SessionDep, settings: SettingsDep) -> Token:
+    if not settings.google_auth_enabled or not settings.google_client_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+
+    identity = verify_google_id_token(payload.credential, settings.google_client_id)
+    if identity is None:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"},
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Google credential"
+        )
+
+    user = user_service.login_with_google(session, identity, settings.allowed_emails_set)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="This account is not allowed"
         )
     return Token(access_token=create_access_token(subject=str(user.id)))
 
 
-@router.post("/login/json", response_model=Token, summary="Log in (JSON body)")
-def login_json(payload: LoginRequest, session: SessionDep) -> Token:
-    """JSON login endpoint, friendlier for SPA / mobile clients."""
-    user = user_service.authenticate(session, payload.email, payload.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-        )
+@router.post("/dev-login", response_model=Token, summary="Dev-only passwordless login")
+def login_dev(session: SessionDep, settings: SettingsDep) -> Token:
+    """Only available when Google sign-in is disabled (never in production)."""
+    if settings.google_auth_enabled:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+    user = user_service.get_or_create_dev_user(session, settings.dev_user_email)
+    if not user.is_active:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is inactive")
     return Token(access_token=create_access_token(subject=str(user.id)))
 
 
