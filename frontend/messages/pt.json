@@ -22,6 +22,7 @@
     "categories": "Categorias",
     "reports": "Relatórios",
     "chat": "Chat",
+    "importExport": "Importar / Exportar",
     "signOut": "Terminar sessão",
     "collapse": "Recolher",
     "expandSidebar": "Expandir barra lateral",
@@ -170,6 +171,91 @@
       "top_categories": "categorias com maior gasto",
       "add_expense": "adicionar despesa",
       "open_add_expense_form": "formulário de despesa"
+    }
+  },
+  "importExport": {
+    "title": "Importar / Exportar",
+    "subtitle": "Importa despesas a partir de um ficheiro CSV ou exporta-as para abrir no Excel.",
+    "import": {
+      "title": "Importar CSV",
+      "intro": "Envia um ficheiro CSV com uma despesa por linha. A primeira linha tem os nomes das colunas.",
+      "formatTitle": "Formato do ficheiro",
+      "colColumn": "Coluna",
+      "colRequired": "Obrigatória",
+      "colRules": "Regras",
+      "yes": "Sim",
+      "no": "Não",
+      "ruleAmount": "Maior que zero, com vírgula ou ponto decimal (ex.: 12,34). Negativos e zero são rejeitados.",
+      "ruleDate": "AAAA-MM-DD ou DD/MM/AAAA. Só o mês (AAAA-MM ou MM/AAAA) fica no dia 1. Vazia: dia 1 do mês por omissão.",
+      "ruleCategory": "Nome da categoria (maiúsculas e acentos não contam). Se não existir, é criada. Vazia: Outros.",
+      "ruleDescription": "Texto livre. Vazia: fica o nome da categoria.",
+      "formatNotes": "Separador ; ou , detetado automaticamente. Também aceita os cabeçalhos data, descricao, valor e categoria. Máximo 2 MB e 5000 linhas.",
+      "example": "Exemplo",
+      "exampleCsv": "date;description;amount;category\n2026-01-15;Supermercado;23,45;Alimentação\n2026-02;Ginásio;42,19;Mensalidades\n;Café;1,20;",
+      "downloadTemplate": "Descarregar modelo",
+      "templateFileName": "modelo_despesas.csv",
+      "fileLabel": "Ficheiro CSV",
+      "defaultMonthLabel": "Mês por omissão (linhas sem data)",
+      "preview": "Pré-visualizar",
+      "checking": "A validar…"
+    },
+    "preview": {
+      "title": "Pré-visualização",
+      "totalRows": "Linhas",
+      "validRows": "Válidas",
+      "invalidRows": "Inválidas",
+      "duplicates": "Duplicadas",
+      "totalAmount": "Total válido",
+      "newCategories": "Categorias a criar",
+      "reactivatedCategories": "Categorias arquivadas a restaurar",
+      "invalidTitle": "Linhas que não vão ser importadas",
+      "line": "Linha {line}",
+      "duplicatesInfo": "{count, plural, one {# despesa já existe} other {# despesas já existem}} com a mesma data, valor e categoria. Vão ser importadas na mesma.",
+      "duplicatesWarning": "{count, plural, one {# despesa já existe} other {# despesas já existem}} na base de dados com a mesma data, valor e categoria. Queres avançar na mesma?",
+      "importAll": "Importar todas",
+      "skipDuplicates": "Ignorar duplicadas",
+      "importValid": "{count, plural, one {Importar # despesa} other {Importar # despesas}}",
+      "nothingToImport": "Não há linhas válidas para importar.",
+      "importing": "A importar…"
+    },
+    "result": {
+      "title": "Importação concluída",
+      "imported": "{count, plural, one {# despesa importada} other {# despesas importadas}}.",
+      "skippedDuplicates": "{count, plural, one {# duplicada ignorada} other {# duplicadas ignoradas}}.",
+      "skippedInvalid": "{count, plural, one {# linha inválida ignorada} other {# linhas inválidas ignoradas}}.",
+      "createdCategories": "Categorias criadas: {names}",
+      "viewExpenses": "Ver despesas",
+      "importAnother": "Importar outro ficheiro"
+    },
+    "export": {
+      "title": "Exportar CSV",
+      "intro": "Descarrega as despesas de um intervalo de datas num CSV que abre no Excel e pode ser reimportado.",
+      "from": "De",
+      "to": "Até",
+      "button": "Exportar",
+      "exporting": "A exportar…",
+      "filePrefix": "despesas",
+      "invalidRange": "A data inicial tem de ser anterior ou igual à final.",
+      "note": "O CSV inclui só despesas: as regras de despesas recorrentes não são exportadas."
+    },
+    "rowErrors": {
+      "missing_amount": "Valor em falta",
+      "invalid_amount": "Valor inválido: {value}",
+      "non_positive_amount": "O valor tem de ser maior que zero: {value}",
+      "too_many_decimals": "Mais de 2 casas decimais: {value}",
+      "amount_too_large": "Valor demasiado grande: {value}",
+      "invalid_date": "Data inválida: {value}",
+      "description_too_long": "Descrição com mais de 500 caracteres",
+      "category_too_long": "Nome de categoria com mais de 100 caracteres"
+    },
+    "errors": {
+      "csv_empty": "O ficheiro está vazio.",
+      "csv_unreadable": "Não foi possível ler o ficheiro CSV.",
+      "csv_missing_amount_column": "Falta a coluna amount (ou valor) no cabeçalho.",
+      "csv_too_many_rows": "O ficheiro tem mais de 5000 linhas.",
+      "csv_too_large": "O ficheiro tem mais de 2 MB.",
+      "duplicates_confirmation_required": "Há despesas duplicadas: confirma a importação.",
+      "generic": "Ocorreu um erro. Tenta novamente."
     }
   }
 }

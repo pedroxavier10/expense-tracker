@@ -91,8 +91,9 @@ Key FastAPI dependencies injected everywhere:
 - **`components/chat/`** — `ChatPanel`, `ChatFAB`, `ChatActionsProvider`
 - **`components/categories/`** — `CategoryList`
 - **`components/reports/`** — `ReportsCharts`, `SummaryCard`
+- **`components/import-export/`** — `ImportCard`, `ImportPreviewPanel`, `ExportCard` (CSV import/export page)
 - **`app/(auth)/`** — Login route (unauthenticated layout)
-- **`app/(app)/`** — Authenticated route group: `dashboard/`, `expenses/`, `recurring/`, `categories/`, `reports/`, `chat/`
+- **`app/(app)/`** — Authenticated route group: `dashboard/`, `expenses/`, `recurring/`, `categories/`, `reports/`, `chat/`, `import-export/`
 - **`messages/`** — `en.json` / `pt.json` translation namespaces consumed by `next-intl`
 
 ### API endpoints
@@ -113,6 +114,10 @@ GET    /api/v1/recurring-expenses/{rule_id}
 PATCH  /api/v1/recurring-expenses/{rule_id}
 DELETE /api/v1/recurring-expenses/{rule_id}
 POST   /api/v1/recurring-expenses/{rule_id}/materialize-current-month  # creates the expense for the current month; 409 if already exists or rule inactive
+GET    /api/v1/import-export/template          # CSV template (date;description;amount;category)
+GET    /api/v1/import-export/export            # CSV; date_from/date_to, default = current year
+POST   /api/v1/import-export/import/preview    # multipart file + default_month; read-only report
+POST   /api/v1/import-export/import            # multipart; 409 if >=10 duplicates and confirm_duplicates=false
 ```
 
 ## Key Conventions

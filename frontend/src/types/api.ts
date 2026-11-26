@@ -163,3 +163,48 @@ export type ChatStreamEvent =
     }
   | { type: "done" }
   | { type: "error"; message: string };
+
+// ---------- CSV import / export ----------
+
+export type DuplicateMode = "import" | "skip";
+
+export type ImportRowErrorCode =
+  | "missing_amount"
+  | "invalid_amount"
+  | "non_positive_amount"
+  | "too_many_decimals"
+  | "amount_too_large"
+  | "invalid_date"
+  | "description_too_long"
+  | "category_too_long";
+
+export interface ImportRowError {
+  /** 1-based line in the uploaded file (the header is line 1). */
+  line: number;
+  code: ImportRowErrorCode;
+  value: string;
+}
+
+export interface ImportPreview {
+  total_rows: number;
+  valid_rows: number;
+  invalid_rows: ImportRowError[];
+  duplicates: number;
+  new_categories: string[];
+  reactivated_categories: string[];
+  total_amount: string; // Decimal as string
+  requires_confirmation: boolean;
+}
+
+export interface ImportResult {
+  imported: number;
+  skipped_duplicates: number;
+  skipped_invalid: number;
+  created_categories: Category[];
+}
+
+export interface ImportOptions {
+  defaultMonth: string; // YYYY-MM
+  duplicateMode: DuplicateMode;
+  confirmDuplicates: boolean;
+}
