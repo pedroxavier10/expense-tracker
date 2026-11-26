@@ -103,7 +103,9 @@
     "category": "Category",
     "description": "Description",
     "descriptionPlaceholder": "e.g. Lunch at the corner café",
-    "saveFailed": "Save failed"
+    "saveFailed": "Save failed",
+    "categorySuggestedHistory": "Suggested from your history",
+    "categorySuggestedLearned": "Learned from your corrections"
   },
   "filters": {
     "title": "Filters",
@@ -216,7 +218,8 @@
       "skipDuplicates": "Skip duplicates",
       "importValid": "{count, plural, one {Import # expense} other {Import # expenses}}",
       "nothingToImport": "There are no valid rows to import.",
-      "importing": "Importing…"
+      "importing": "Importing…",
+      "inferredCategories": "{count, plural, one {# row without a category will use} other {# rows without a category will use}} the category learned from your history."
     },
     "result": {
       "title": "Import complete",

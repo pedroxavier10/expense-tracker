@@ -39,6 +39,11 @@ export function ImportPreviewPanel({ preview, busy, onImport, onCancel }: Props)
         ))}
       </dl>
 
+      {preview.inferred_categories > 0 && (
+        <p className="text-sm text-ink-muted">
+          {t("inferredCategories", { count: preview.inferred_categories })}
+        </p>
+      )}
       {preview.new_categories.length > 0 && (
         <CategoryChips label={t("newCategories")} names={preview.new_categories} />
       )}

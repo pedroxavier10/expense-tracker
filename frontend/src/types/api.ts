@@ -13,6 +13,15 @@ export interface Category {
   is_active: boolean;
 }
 
+/** Mirrors backend `CategorySuggestionRead`. */
+export interface CategorySuggestion {
+  category: Category;
+  /** 0..1 */
+  confidence: number;
+  /** `learned` = from the user's own corrections; `history` = similar past expenses. */
+  source: "learned" | "history";
+}
+
 export interface CategoryCreatePayload {
   name: string;
   icon?: string | null;
@@ -194,6 +203,8 @@ export interface ImportPreview {
   reactivated_categories: string[];
   total_amount: string; // Decimal as string
   requires_confirmation: boolean;
+  /** Rows without a category that got one from the user's corrections/history. */
+  inferred_categories: number;
 }
 
 export interface ImportResult {

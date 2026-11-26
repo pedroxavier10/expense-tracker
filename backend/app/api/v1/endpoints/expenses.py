@@ -4,9 +4,11 @@ from datetime import date
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, Response, status
 
 from app.api.deps import CurrentUser, SessionDep
+from app.schemas.category import CategoryRead
+from app.schemas.category_suggestion import CategorySuggestionRead
 from app.schemas.expense import (
     AnnualSummaryResponse,
     ExpenseCreate,
@@ -16,7 +18,7 @@ from app.schemas.expense import (
     ExpenseUpdate,
     MonthlySummaryResponse,
 )
-from app.services import category_service, expense_service
+from app.services import category_service, category_suggestion_service, expense_service
 
 router = APIRouter(prefix="/expenses", tags=["expenses"])
 
@@ -79,6 +81,27 @@ def create_expense(
         raise HTTPException(status_code=404, detail="Category not found")
     expense = expense_service.create_expense(session, current_user.id, payload)
     return ExpenseRead.model_validate(expense)
+
+
+@router.get(
+    "/category-suggestion",
+    response_model=CategorySuggestionRead,
+    responses={204: {"description": "No confident suggestion"}},
+    summary="Suggest a category for a description (learned corrections + history)",
+)
+def suggest_category(
+    session: SessionDep,
+    current_user: CurrentUser,
+    description: Annotated[str, Query(min_length=1, max_length=500)],
+) -> CategorySuggestionRead | Response:
+    suggestion = category_suggestion_service.suggest_category(session, current_user.id, description)
+    if suggestion is None:
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    return CategorySuggestionRead(
+        category=CategoryRead.model_validate(suggestion.category),
+        confidence=suggestion.confidence,
+        source=suggestion.source,
+    )
 
 
 @router.get(

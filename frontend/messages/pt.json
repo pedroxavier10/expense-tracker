@@ -103,7 +103,9 @@
     "category": "Categoria",
     "description": "Descrição",
     "descriptionPlaceholder": "ex. Almoço no café da esquina",
-    "saveFailed": "Falha ao guardar"
+    "saveFailed": "Falha ao guardar",
+    "categorySuggestedHistory": "Sugerida pelo teu histórico",
+    "categorySuggestedLearned": "Aprendida com as tuas correções"
   },
   "filters": {
     "title": "Filtros",
@@ -216,7 +218,8 @@
       "skipDuplicates": "Ignorar duplicadas",
       "importValid": "{count, plural, one {Importar # despesa} other {Importar # despesas}}",
       "nothingToImport": "Não há linhas válidas para importar.",
-      "importing": "A importar…"
+      "importing": "A importar…",
+      "inferredCategories": "{count, plural, one {# linha sem categoria vai usar} other {# linhas sem categoria vão usar}} a categoria aprendida com o teu histórico."
     },
     "result": {
       "title": "Importação concluída",

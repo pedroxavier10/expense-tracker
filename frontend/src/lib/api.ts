@@ -14,6 +14,7 @@ import type {
   Category,
   CategoryCreatePayload,
   CategoryDeleteResult,
+  CategorySuggestion,
   CategoryUpdatePayload,
   ChatMessage,
   ChatStreamEvent,
@@ -219,6 +220,17 @@ export async function updateExpense(
 
 export async function deleteExpense(id: string): Promise<void> {
   return request<void>(`/expenses/${id}`, { method: "DELETE" });
+}
+
+/** Learned category for a description; `null` when there is no confident match (HTTP 204). */
+export async function suggestCategory(
+  description: string
+): Promise<CategorySuggestion | null> {
+  const params = new URLSearchParams({ description });
+  const result = await request<CategorySuggestion | undefined>(
+    `/expenses/category-suggestion?${params.toString()}`
+  );
+  return result ?? null;
 }
 
 export async function getMonthSummary(month: string): Promise<MonthlySummaryResponse> {

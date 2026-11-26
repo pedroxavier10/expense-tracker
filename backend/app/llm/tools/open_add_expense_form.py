@@ -15,7 +15,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 from sqlmodel import Session
 
-from app.services import category_service
+from app.services import category_service, category_suggestion_service
 
 
 class OpenAddExpenseFormInput(BaseModel):
@@ -39,6 +39,14 @@ def open_add_expense_form(
         cat = category_service.get_category_by_slug(session, user_id, payload.category_slug)
         if cat:
             category_id = str(cat.id)
+    if category_id is None and payload.description:
+        # The model gave no (valid) category: fall back to what the user's own
+        # corrections/history say. The user still reviews it in the form.
+        suggestion = category_suggestion_service.suggest_category(
+            session, user_id, payload.description
+        )
+        if suggestion:
+            category_id = str(suggestion.category.id)
 
     # `amount` is a float on the input model (see note on the field above:
     # Decimal would emit a lookahead-regex JSON Schema that Groq rejects with a

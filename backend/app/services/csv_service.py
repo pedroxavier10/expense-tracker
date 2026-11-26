@@ -38,6 +38,7 @@ from app.schemas.import_export import (
     RowErrorCode,
 )
 from app.services import slug_service
+from app.services.category_suggestion_service import CategorySuggester
 from app.services.text_normalization import fold_text
 
 MAX_FILE_BYTES = 2 * 1024 * 1024
@@ -272,6 +273,8 @@ class _PlannedRow:
     category: Category | None = None
     new_category_key: str | None = None
     is_duplicate: bool = False
+    # The CSV had no category; it was inferred from the user's corrections/history.
+    category_inferred: bool = False
 
 
 @dataclass
@@ -299,13 +302,22 @@ def _plan_import(session: Session, user: User, parsed: ParsedCsv) -> _ImportPlan
         (lookup[k] for k in _OTHER_KEYS if k in lookup), None
     )
     other_key = normalize_key(_other_display_name(user))
+    # Loaded lazily, once, only if some row has no category at all.
+    suggester: CategorySuggester | None = None
 
     plan = _ImportPlan(rows=[], new_categories={}, reactivate=[])
     for row in parsed.rows:
         planned = _PlannedRow(row=row)
         key = normalize_key(row.category) if row.category else ""
+        suggestion = None
+        if not key and row.description:
+            suggester = suggester or CategorySuggester(session, user.id)
+            suggestion = suggester.suggest(row.description)
         if key and key in lookup:
             planned.category = lookup[key]
+        elif suggestion is not None:
+            planned.category = suggestion.category
+            planned.category_inferred = True
         elif not key or key in _OTHER_KEYS:
             # No category (or an explicit "Other"/"Outros" that doesn't exist).
             if other is not None:
@@ -362,6 +374,7 @@ def build_preview(session: Session, user: User, parsed: ParsedCsv) -> ImportPrev
         reactivated_categories=sorted((c.name for c in plan.reactivate), key=normalize_key),
         total_amount=sum((r.amount for r in parsed.rows), Decimal("0.00")),
         requires_confirmation=duplicates >= DUPLICATE_CONFIRM_THRESHOLD,
+        inferred_categories=sum(1 for r in plan.rows if r.category_inferred),
     )
 
 
