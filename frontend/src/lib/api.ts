@@ -14,6 +14,9 @@ import type {
   Category,
   CategoryCreatePayload,
   CategoryDeleteResult,
+  CategoryHint,
+  CategoryHintUpdatePayload,
+  CategorySuggestion,
   CategoryUpdatePayload,
   ChatMessage,
   ChatStreamEvent,
@@ -180,6 +183,26 @@ export async function deleteCategory(id: string): Promise<CategoryDeleteResult> 
   });
 }
 
+// ---------- Category hints (learned from category corrections) ----------
+
+export async function listCategoryHints(): Promise<CategoryHint[]> {
+  return request<CategoryHint[]>("/category-hints");
+}
+
+export async function updateCategoryHint(
+  id: string,
+  payload: CategoryHintUpdatePayload
+): Promise<CategoryHint> {
+  return request<CategoryHint>(`/category-hints/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteCategoryHint(id: string): Promise<void> {
+  return request<void>(`/category-hints/${id}`, { method: "DELETE" });
+}
+
 // ---------- Expenses ----------
 
 function buildQuery(filters: ExpenseFilters): string {
@@ -219,6 +242,17 @@ export async function updateExpense(
 
 export async function deleteExpense(id: string): Promise<void> {
   return request<void>(`/expenses/${id}`, { method: "DELETE" });
+}
+
+/** Learned category for a description; `null` when there is no confident match (HTTP 204). */
+export async function suggestCategory(
+  description: string
+): Promise<CategorySuggestion | null> {
+  const params = new URLSearchParams({ description });
+  const result = await request<CategorySuggestion | undefined>(
+    `/expenses/category-suggestion?${params.toString()}`
+  );
+  return result ?? null;
 }
 
 export async function getMonthSummary(month: string): Promise<MonthlySummaryResponse> {

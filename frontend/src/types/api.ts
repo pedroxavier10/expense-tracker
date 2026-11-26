@@ -13,6 +13,29 @@ export interface Category {
   is_active: boolean;
 }
 
+/** Mirrors backend `CategorySuggestionRead`. */
+export interface CategorySuggestion {
+  category: Category;
+  /** 0..1 */
+  confidence: number;
+  /** `learned` = from the user's own corrections; `history` = similar past expenses. */
+  source: "learned" | "history";
+}
+
+/** Mirrors backend `CategoryHintRead`: a learned "description → category" preference. */
+export interface CategoryHint {
+  id: string;
+  description: string;
+  /** `is_active === false` when archived: the hint is kept but not used. */
+  category: Category;
+  hit_count: number;
+  last_used_at: string; // ISO datetime
+}
+
+export interface CategoryHintUpdatePayload {
+  category_id: string;
+}
+
 export interface CategoryCreatePayload {
   name: string;
   icon?: string | null;
@@ -194,6 +217,8 @@ export interface ImportPreview {
   reactivated_categories: string[];
   total_amount: string; // Decimal as string
   requires_confirmation: boolean;
+  /** Rows without a category that got one from the user's corrections/history. */
+  inferred_categories: number;
 }
 
 export interface ImportResult {

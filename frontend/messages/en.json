@@ -103,7 +103,9 @@
     "category": "Category",
     "description": "Description",
     "descriptionPlaceholder": "e.g. Lunch at the corner café",
-    "saveFailed": "Save failed"
+    "saveFailed": "Save failed",
+    "categorySuggestedHistory": "Suggested from your history",
+    "categorySuggestedLearned": "Learned from your corrections"
   },
   "filters": {
     "title": "Filters",
@@ -130,7 +132,18 @@
     "namePlaceholder": "e.g. Groceries",
     "iconLabel": "Icon",
     "slugAutoNote": "A slug is generated automatically for the assistant.",
-    "confirmDeleteNote": "If this category has expenses, it will be archived instead of deleted."
+    "confirmDeleteNote": "If this category has expenses, it will be archived instead of deleted.",
+    "learned": {
+      "title": "What I learned",
+      "subtitle": "When you change the category of an expense, I remember it for next time — in the form, the chat and CSV imports.",
+      "empty": "Nothing learned yet. Change the category of an expense and the preference will show up here.",
+      "meta": "{count, plural, one {Corrected # time} other {Corrected # times}} · last on {date}",
+      "archivedCategory": "archived category, not in use",
+      "categoryLabel": "Category for \"{description}\"",
+      "forget": "Forget",
+      "forgetLabel": "Forget \"{description}\"",
+      "saveFailed": "Save failed"
+    }
   },
   "reports": {
     "title": "Reports",
@@ -216,7 +229,8 @@
       "skipDuplicates": "Skip duplicates",
       "importValid": "{count, plural, one {Import # expense} other {Import # expenses}}",
       "nothingToImport": "There are no valid rows to import.",
-      "importing": "Importing…"
+      "importing": "Importing…",
+      "inferredCategories": "{count, plural, one {# row without a category will use} other {# rows without a category will use}} the category learned from your history."
     },
     "result": {
       "title": "Import complete",

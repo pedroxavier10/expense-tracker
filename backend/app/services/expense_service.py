@@ -16,6 +16,7 @@ from sqlmodel import Session, col, select
 from app.models.category import Category
 from app.models.expense import Expense
 from app.schemas.expense import ExpenseCreate, ExpenseFilters, ExpenseUpdate
+from app.services import category_suggestion_service
 
 
 def _resolve_month(month: str) -> tuple[date, date]:
@@ -100,10 +101,18 @@ def update_expense(
     if not expense:
         return None
 
+    previous_category_id = expense.category_id
     update_data = data.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(expense, field, value)
     expense.updated_at = datetime.now(UTC)
+
+    # A category change on an existing expense is a correction: remember it so
+    # future suggestions (form, chat) pick the category the user actually wants.
+    if expense.category_id != previous_category_id:
+        category_suggestion_service.record_correction(
+            session, user_id, expense.description, expense.category_id
+        )
 
     session.add(expense)
     session.commit()

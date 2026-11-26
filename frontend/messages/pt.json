@@ -103,7 +103,9 @@
     "category": "Categoria",
     "description": "Descrição",
     "descriptionPlaceholder": "ex. Almoço no café da esquina",
-    "saveFailed": "Falha ao guardar"
+    "saveFailed": "Falha ao guardar",
+    "categorySuggestedHistory": "Sugerida pelo teu histórico",
+    "categorySuggestedLearned": "Aprendida com as tuas correções"
   },
   "filters": {
     "title": "Filtros",
@@ -130,7 +132,18 @@
     "namePlaceholder": "ex.: Supermercado",
     "iconLabel": "Ícone",
     "slugAutoNote": "É gerado automaticamente um slug para o assistente.",
-    "confirmDeleteNote": "Se esta categoria tiver despesas, será arquivada em vez de eliminada."
+    "confirmDeleteNote": "Se esta categoria tiver despesas, será arquivada em vez de eliminada.",
+    "learned": {
+      "title": "O que aprendi",
+      "subtitle": "Quando mudas a categoria de uma despesa, guardo essa preferência para a próxima vez — no formulário, no chat e na importação de CSV.",
+      "empty": "Ainda não aprendi nada. Muda a categoria de uma despesa e a preferência aparece aqui.",
+      "meta": "{count, plural, one {Corrigido # vez} other {Corrigido # vezes}} · última em {date}",
+      "archivedCategory": "categoria arquivada, não está a ser usada",
+      "categoryLabel": "Categoria de \"{description}\"",
+      "forget": "Esquecer",
+      "forgetLabel": "Esquecer \"{description}\"",
+      "saveFailed": "Falha ao guardar"
+    }
   },
   "reports": {
     "title": "Relatórios",
@@ -216,7 +229,8 @@
       "skipDuplicates": "Ignorar duplicadas",
       "importValid": "{count, plural, one {Importar # despesa} other {Importar # despesas}}",
       "nothingToImport": "Não há linhas válidas para importar.",
-      "importing": "A importar…"
+      "importing": "A importar…",
+      "inferredCategories": "{count, plural, one {# linha sem categoria vai usar} other {# linhas sem categoria vão usar}} a categoria aprendida com o teu histórico."
     },
     "result": {
       "title": "Importação concluída",

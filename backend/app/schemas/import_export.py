@@ -48,6 +48,9 @@ class ImportPreview(BaseModel):
     total_amount: Decimal
     # True when `duplicates` reaches the confirmation threshold.
     requires_confirmation: bool
+    # Rows without a category whose category was inferred from the user's
+    # corrections/history (instead of falling back to "Other").
+    inferred_categories: int = 0
 
 
 class ImportResult(BaseModel):

@@ -3,13 +3,18 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useState, type FormEvent } from "react";
 
+import { suggestCategory } from "@/lib/api";
 import { todayIso } from "@/lib/format";
 import type {
   Category,
+  CategorySuggestion,
   Expense,
   ExpenseCreatePayload,
   ExpenseUpdatePayload,
 } from "@/types/api";
+
+const SUGGESTION_DEBOUNCE_MS = 400;
+const SUGGESTION_MIN_LENGTH = 3;
 
 export interface ExpenseFormInitialValues {
   amount?: string;
@@ -54,11 +59,48 @@ export function ExpenseForm({
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // The category was picked explicitly (by the user, or prefilled by the chat):
+  // never overwrite it with a suggestion. Editing an existing expense counts too.
+  const [categoryTouched, setCategoryTouched] = useState(
+    Boolean(initial || initialValues?.category_id),
+  );
+  const [suggestionSource, setSuggestionSource] = useState<
+    CategorySuggestion["source"] | null
+  >(null);
 
   // If the available categories list arrives after initial render, fill it in.
   useEffect(() => {
     if (!categoryId && categories[0]) setCategoryId(categories[0].id);
   }, [categories, categoryId]);
+
+  // Pre-select the category learned from the user's corrections/history.
+  useEffect(() => {
+    const text = description.trim();
+    if (categoryTouched || text.length < SUGGESTION_MIN_LENGTH) return;
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      suggestCategory(text)
+        .then((suggestion) => {
+          if (cancelled || !suggestion) return;
+          if (!categories.some((c) => c.id === suggestion.category.id)) return;
+          setCategoryId(suggestion.category.id);
+          setSuggestionSource(suggestion.source);
+        })
+        .catch(() => {
+          // Suggestions are best-effort; the user can always pick manually.
+        });
+    }, SUGGESTION_DEBOUNCE_MS);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [description, categoryTouched, categories]);
+
+  function handleCategoryChange(value: string) {
+    setCategoryId(value);
+    setCategoryTouched(true);
+    setSuggestionSource(null);
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -73,8 +115,11 @@ export function ExpenseForm({
       });
       if (!initial) {
         // Reset on successful create; keep date and category for fast multi-entry.
+        // The next description may suggest a different category again.
         setAmount("");
         setDescription("");
+        setCategoryTouched(false);
+        setSuggestionSource(null);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : t("saveFailed"));
@@ -128,7 +173,8 @@ export function ExpenseForm({
           required
           className="field"
           value={categoryId}
-          onChange={(e) => setCategoryId(e.target.value)}
+          onChange={(e) => handleCategoryChange(e.target.value)}
+          aria-describedby={suggestionSource ? "category-suggestion" : undefined}
         >
           {categories.map((c) => (
             <option key={c.id} value={c.id}>
@@ -137,6 +183,13 @@ export function ExpenseForm({
             </option>
           ))}
         </select>
+        {suggestionSource && (
+          <p id="category-suggestion" className="mt-1 text-xs text-ink-muted">
+            {suggestionSource === "learned"
+              ? t("categorySuggestedLearned")
+              : t("categorySuggestedHistory")}
+          </p>
+        )}
       </div>
 
       <div>

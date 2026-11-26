@@ -32,14 +32,21 @@ interface ChatActionsState {
 const ChatActionsContext = createContext<ChatActionsState | null>(null);
 
 export function ChatActionsProvider({ children }: { children: ReactNode }) {
-  const { categories } = useCategories();
+  // This provider lives in AppShell and stays mounted across navigation, so the
+  // list fetched on mount goes stale once categories are created/reactivated
+  // elsewhere. Refetch every time the modal opens.
+  const { categories, refetch: refetchCategories } = useCategories();
   const [open, setOpen] = useState(false);
   const [prefill, setPrefill] = useState<ExpenseFormInitialValues | undefined>();
 
-  const openAddExpense = useCallback((values?: ExpenseFormInitialValues) => {
-    setPrefill(values);
-    setOpen(true);
-  }, []);
+  const openAddExpense = useCallback(
+    (values?: ExpenseFormInitialValues) => {
+      setPrefill(values);
+      setOpen(true);
+      void refetchCategories();
+    },
+    [refetchCategories],
+  );
 
   const handleSubmit = useCallback(
     async (data: ExpenseCreatePayload | ExpenseUpdatePayload) => {
