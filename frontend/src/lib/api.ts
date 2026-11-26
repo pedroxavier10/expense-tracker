@@ -22,6 +22,9 @@ import type {
   ExpenseFilters,
   ExpenseListResponse,
   ExpenseUpdatePayload,
+  ImportOptions,
+  ImportPreview,
+  ImportResult,
   MonthlySummaryResponse,
   RecurringExpense,
   RecurringExpenseCreatePayload,
@@ -261,6 +264,69 @@ export async function materializeRecurringExpenseCurrentMonth(
   return request<Expense>(`/recurring-expenses/${id}/materialize-current-month`, {
     method: "POST",
   });
+}
+
+// ---------- CSV import / export ----------
+// `request()` always sends and parses JSON, so file transfers use these two
+// helpers (same Bearer token + ApiError behaviour).
+
+function authHeader(): Record<string, string> {
+  const token = getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+async function apiErrorFrom(res: Response): Promise<ApiError> {
+  let detail = res.statusText;
+  try {
+    const body = await res.json();
+    if (body && typeof body.detail === "string") detail = body.detail;
+    else if (body && body.detail) detail = JSON.stringify(body.detail);
+  } catch {
+    // non-JSON error body: keep statusText
+  }
+  return new ApiError(res.status, detail);
+}
+
+async function requestBlob(path: string): Promise<Blob> {
+  const res = await fetch(`${API_URL}${path}`, { headers: authHeader() });
+  if (!res.ok) throw await apiErrorFrom(res);
+  return res.blob();
+}
+
+async function requestForm<T>(path: string, form: FormData): Promise<T> {
+  // No Content-Type: the browser sets multipart/form-data with its boundary.
+  const res = await fetch(`${API_URL}${path}`, {
+    method: "POST",
+    headers: authHeader(),
+    body: form,
+  });
+  if (!res.ok) throw await apiErrorFrom(res);
+  return (await res.json()) as T;
+}
+
+export async function downloadImportTemplate(): Promise<Blob> {
+  return requestBlob("/import-export/template");
+}
+
+export async function exportExpensesCsv(dateFrom: string, dateTo: string): Promise<Blob> {
+  const qs = new URLSearchParams({ date_from: dateFrom, date_to: dateTo });
+  return requestBlob(`/import-export/export?${qs.toString()}`);
+}
+
+export async function previewImport(file: File, defaultMonth: string): Promise<ImportPreview> {
+  const form = new FormData();
+  form.append("file", file);
+  form.append("default_month", defaultMonth);
+  return requestForm<ImportPreview>("/import-export/import/preview", form);
+}
+
+export async function importExpenses(file: File, options: ImportOptions): Promise<ImportResult> {
+  const form = new FormData();
+  form.append("file", file);
+  form.append("default_month", options.defaultMonth);
+  form.append("duplicate_mode", options.duplicateMode);
+  form.append("confirm_duplicates", String(options.confirmDuplicates));
+  return requestForm<ImportResult>("/import-export/import", form);
 }
 
 // ---------- Chat (SSE streaming) ----------

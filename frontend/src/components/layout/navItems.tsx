@@ -6,7 +6,8 @@ export type NavKey =
   | "recurring"
   | "categories"
   | "reports"
-  | "chat";
+  | "chat"
+  | "importExport";
 
 export interface NavItem {
   href: string;
@@ -55,6 +56,16 @@ export const NAV_ITEMS: NavItem[] = [
         <circle cx="13" cy="5" r="2.5" />
         <circle cx="5" cy="13" r="2.5" />
         <circle cx="13" cy="13" r="2.5" />
+      </svg>
+    ),
+  },
+    {
+    href: "/import-export",
+    key: "importExport",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M6 3v10M3 10l3 3 3-3" />
+        <path d="M12 15V5M9 8l3-3 3 3" />
       </svg>
     ),
   },
