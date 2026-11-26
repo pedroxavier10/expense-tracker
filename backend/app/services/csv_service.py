@@ -18,7 +18,6 @@ import codecs
 import csv
 import io
 import re
-import unicodedata
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 from datetime import date
@@ -39,6 +38,7 @@ from app.schemas.import_export import (
     RowErrorCode,
 )
 from app.services import slug_service
+from app.services.text_normalization import fold_text
 
 MAX_FILE_BYTES = 2 * 1024 * 1024
 MAX_ROWS = 5000
@@ -118,9 +118,7 @@ class ParsedCsv:
 
 def normalize_key(value: str) -> str:
     """Case- and accent-insensitive comparison key."""
-    normalized = unicodedata.normalize("NFKD", value.replace("﻿", ""))
-    ascii_only = "".join(c for c in normalized if not unicodedata.combining(c))
-    return " ".join(ascii_only.casefold().split())
+    return fold_text(value)
 
 
 def _decode(raw: bytes) -> str:
