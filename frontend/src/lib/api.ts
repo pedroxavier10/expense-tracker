@@ -14,6 +14,8 @@ import type {
   Category,
   CategoryCreatePayload,
   CategoryDeleteResult,
+  CategoryHint,
+  CategoryHintUpdatePayload,
   CategorySuggestion,
   CategoryUpdatePayload,
   ChatMessage,
@@ -179,6 +181,26 @@ export async function deleteCategory(id: string): Promise<CategoryDeleteResult> 
   return request<CategoryDeleteResult>(`/categories/${id}`, {
     method: "DELETE",
   });
+}
+
+// ---------- Category hints (learned from category corrections) ----------
+
+export async function listCategoryHints(): Promise<CategoryHint[]> {
+  return request<CategoryHint[]>("/category-hints");
+}
+
+export async function updateCategoryHint(
+  id: string,
+  payload: CategoryHintUpdatePayload
+): Promise<CategoryHint> {
+  return request<CategoryHint>(`/category-hints/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteCategoryHint(id: string): Promise<void> {
+  return request<void>(`/category-hints/${id}`, { method: "DELETE" });
 }
 
 // ---------- Expenses ----------

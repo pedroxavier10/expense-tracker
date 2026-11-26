@@ -132,7 +132,18 @@
     "namePlaceholder": "e.g. Groceries",
     "iconLabel": "Icon",
     "slugAutoNote": "A slug is generated automatically for the assistant.",
-    "confirmDeleteNote": "If this category has expenses, it will be archived instead of deleted."
+    "confirmDeleteNote": "If this category has expenses, it will be archived instead of deleted.",
+    "learned": {
+      "title": "What I learned",
+      "subtitle": "When you change the category of an expense, I remember it for next time — in the form, the chat and CSV imports.",
+      "empty": "Nothing learned yet. Change the category of an expense and the preference will show up here.",
+      "meta": "{count, plural, one {Corrected # time} other {Corrected # times}} · last on {date}",
+      "archivedCategory": "archived category, not in use",
+      "categoryLabel": "Category for \"{description}\"",
+      "forget": "Forget",
+      "forgetLabel": "Forget \"{description}\"",
+      "saveFailed": "Save failed"
+    }
   },
   "reports": {
     "title": "Reports",

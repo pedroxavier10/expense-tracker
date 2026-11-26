@@ -198,3 +198,55 @@ def hints_for_prompt(
         ),
     )
     return [pair for _, pair in ranked[:limit]]
+
+
+# ---------------------------------------------------------------------------
+# Managing hints ("O que aprendi")
+# ---------------------------------------------------------------------------
+
+
+def list_hints(session: Session, user_id: UUID) -> list[tuple[CategoryHint, Category]]:
+    """All of the user's hints (archived categories included), most recent first."""
+    rows = session.exec(
+        select(CategoryHint, Category)
+        .join(Category, col(Category.id) == CategoryHint.category_id)
+        .where(CategoryHint.user_id == user_id)
+        .order_by(col(CategoryHint.last_used_at).desc())
+    ).all()
+    return list(rows)
+
+
+def get_hint(session: Session, user_id: UUID, hint_id: UUID) -> CategoryHint | None:
+    hint = session.get(CategoryHint, hint_id)
+    if hint and hint.user_id == user_id:
+        return hint
+    return None
+
+
+def update_hint_category(
+    session: Session, user_id: UUID, hint_id: UUID, category: Category
+) -> tuple[CategoryHint, Category] | None:
+    """Point a hint to another category (already validated as the user's own).
+
+    Counts as a fresh correction: the hit count restarts when the category changes.
+    """
+    hint = get_hint(session, user_id, hint_id)
+    if hint is None:
+        return None
+    if hint.category_id != category.id:
+        hint.category_id = category.id
+        hint.hit_count = 1
+    hint.last_used_at = datetime.now(UTC)
+    session.add(hint)
+    session.commit()
+    session.refresh(hint)
+    return hint, category
+
+
+def delete_hint(session: Session, user_id: UUID, hint_id: UUID) -> bool:
+    hint = get_hint(session, user_id, hint_id)
+    if hint is None:
+        return False
+    session.delete(hint)
+    session.commit()
+    return True

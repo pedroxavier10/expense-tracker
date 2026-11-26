@@ -22,6 +22,20 @@ export interface CategorySuggestion {
   source: "learned" | "history";
 }
 
+/** Mirrors backend `CategoryHintRead`: a learned "description → category" preference. */
+export interface CategoryHint {
+  id: string;
+  description: string;
+  /** `is_active === false` when archived: the hint is kept but not used. */
+  category: Category;
+  hit_count: number;
+  last_used_at: string; // ISO datetime
+}
+
+export interface CategoryHintUpdatePayload {
+  category_id: string;
+}
+
 export interface CategoryCreatePayload {
   name: string;
   icon?: string | null;

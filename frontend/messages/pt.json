@@ -132,7 +132,18 @@
     "namePlaceholder": "ex.: Supermercado",
     "iconLabel": "Ícone",
     "slugAutoNote": "É gerado automaticamente um slug para o assistente.",
-    "confirmDeleteNote": "Se esta categoria tiver despesas, será arquivada em vez de eliminada."
+    "confirmDeleteNote": "Se esta categoria tiver despesas, será arquivada em vez de eliminada.",
+    "learned": {
+      "title": "O que aprendi",
+      "subtitle": "Quando mudas a categoria de uma despesa, guardo essa preferência para a próxima vez — no formulário, no chat e na importação de CSV.",
+      "empty": "Ainda não aprendi nada. Muda a categoria de uma despesa e a preferência aparece aqui.",
+      "meta": "{count, plural, one {Corrigido # vez} other {Corrigido # vezes}} · última em {date}",
+      "archivedCategory": "categoria arquivada, não está a ser usada",
+      "categoryLabel": "Categoria de \"{description}\"",
+      "forget": "Esquecer",
+      "forgetLabel": "Esquecer \"{description}\"",
+      "saveFailed": "Falha ao guardar"
+    }
   },
   "reports": {
     "title": "Relatórios",
